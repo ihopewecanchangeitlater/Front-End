@@ -24,6 +24,7 @@ const CarPage = ({ isAgent, carId }) => {
     fetchCar();
   }, [carId]);
 
+  // Ενημέρωση ποσότητας αυτοκινήτων στην βάση
   const handleUpdateQuantity = async () => {
     try {
       await updateCarQuantity(carId, { quantity: newQuantity });
@@ -34,7 +35,32 @@ const CarPage = ({ isAgent, carId }) => {
     }
   };
 
+  // Λειτουργία Test Drive (παίρνει ΜΟΝΟ ένα αμάξι για test drive)
+  const handleTestDrive = () => {
+    if (testDriveCars > 0) {
+      alert("You can only have one car for a test drive at a time!");
+      return;
+    }
+  
+    // Θα μπει το αμάξι σε μια λίστα με αυτοκίνητα που είναι σε test drive
+    // Αφαιρείται από την ποσότητα των διαθέσιμων αυτοκινήτων
+    if (quantity > 0) {
+      setQuantity(quantity - 1);
+      setTestDriveCars(testDriveCars + 1);
+      alert("Car added to test drive list!");
+    } else {
+      alert("No cars available for test drive!");
+    }
+  };
+  
+  // Αγορά αυτοκινήτου (μείωση της ποσότητας κατά 1)
+  // Εάν έχει αυτοκίνητο σε test drive, δεν μπορεί να αγοράσει άλλο
   const handleBuyCar = async () => {
+    if (testDriveCars > 0) {
+      alert("You must return the test drive car before buying!");
+      return;
+    }
+  
     if (quantity > 0) {
       try {
         await buyCar(carId);
@@ -47,17 +73,8 @@ const CarPage = ({ isAgent, carId }) => {
       alert("No cars available for purchase!");
     }
   };
-
-  const handleTestDrive = () => {
-    if (quantity > 0) {
-      setQuantity(quantity - 1);
-      setTestDriveCars(testDriveCars + 1);
-      alert("Added to test drive list!");
-    } else {
-      alert("No cars available for test drive!");
-    }
-  };
-
+  
+  // Επιστροφή αμαξιού από test drive
   const handleCarReturn = () => {
     if (testDriveCars > 0) {
       setQuantity(quantity + 1);
@@ -67,13 +84,15 @@ const CarPage = ({ isAgent, carId }) => {
       alert("No cars to return!");
     }
   };
+  
 
   const handleCancel = () => {
-    navigate("/"); // Επιστροφή στο Dashboard
+    navigate("/"); // Επιστροφή στο Dashboard (όταν έχει κάτι να επιστρέψει)
   };
 
   if (!car) return <p>Loading...</p>;
 
+  // Εδώ προστέθηκε Talwind CSS
   return (
     <div className="flex flex-col md:flex-row gap-4 p-6 bg-gray-100 min-h-screen">
       {/* Πληροφορίες Αυτοκινήτου */}
