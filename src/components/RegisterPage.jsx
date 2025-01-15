@@ -11,8 +11,9 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
     email: '',
     password: '',
     afm: '',
-    owner: '', // Προσθήκη πεδίου owner για τον agent
+    owner: '',
   });
+  const [showPassword, setShowPassword] = useState(false); // Για εμφάνιση κωδικού
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -25,7 +26,6 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      // Ενημερώνουμε το API endpoint ανάλογα με τον ρόλο
       const response = await fetch(`${API_URL}/api/${role === 'citizen' ? 'citizens' : 'agencies'}/register`, {
         method: 'POST',
         headers: {
@@ -52,13 +52,17 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
       <div className="mb-4">
         <button
           onClick={() => setRole('citizen')}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+          className={`px-4 py-2 rounded-md mr-2 ${
+            role === 'citizen' ? 'bg-green-500' : 'bg-blue-500'
+          } text-white`}
         >
           Πολίτης
         </button>
         <button
           onClick={() => setRole('agent')}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          className={`px-4 py-2 rounded-md ${
+            role === 'agent' ? 'bg-green-500' : 'bg-blue-500'
+          } text-white`}
         >
           Αντιπρόσωπος
         </button>
@@ -88,37 +92,19 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
-
-          {/* Εμφανίζεται το πεδίο surname μόνο αν ο ρόλος είναι citizen */}
-          {role === 'citizen' && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Surname:</label>
-              <input
-                type="text"
-                name="surname"
-                value={formData.surname}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-          )}
-
-          {/* Εμφανίζεται το πεδίο owner name μόνο αν ο ρόλος είναι agent */}
-          {role === 'agent' && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Owner Name:</label>
-              <input
-                type="text"
-                name="owner"
-                value={formData.owner}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-          )}
-
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">
+              {role === 'citizen' ? 'Surname:' : 'Owner Name:'}
+            </label>
+            <input
+              type="text"
+              name={role === 'citizen' ? 'surname' : 'owner'}
+              value={role === 'citizen' ? formData.surname : formData.owner}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Email:</label>
             <input
@@ -133,21 +119,36 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Password:</label>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               name="password"
               value={formData.password}
               onChange={handleInputChange}
               required
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="mt-2 text-sm text-blue-500 hover:underline"
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
           </div>
-
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md w-full"
-          >
-            Register
-          </button>
+          <div className="flex justify-between">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md"
+            >
+              Πίσω
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            >
+              Register
+            </button>
+          </div>
         </form>
       )}
     </div>
