@@ -4,12 +4,12 @@ const API_URL = "http://localhost:8080"; // Λογικά αυτό είναι τ�
 
 // Λήψη της εγγραφής του αυτοκινήτου ανάλογα με το ID του
 export const getCarById = async (carId) => {
-  return await axios.get(`${API_URL}/cars/${carId}`);
+  return await axios.get(`${API_URL}/api/cars/${carId}`);
 };
 
 // Ενημέρωση της ποσότητας του αυτοκινήτου στη βάση (αντοπροσωπεία)
 export const updateCarQuantity = async (carId, quantity) => {
-  return await axios.patch(`${API_URL}/cars/updateQuantity/${carId}`, quantity);
+  return await axios.patch(`${API_URL}/api/cars/updateQuantity/${carId}`, quantity);
 };
 
 // Ενημέρωση της ποσότητας των αυτοκινήτων μετά την αγορά (Πολίτης)

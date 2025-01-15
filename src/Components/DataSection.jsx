@@ -12,7 +12,7 @@ function DataSection() {
 	const fetchData = async () => {
 		setLoading(true);
 		try {
-			const response = await axios.get("http://127.0.0.1:8080/cars/search", {
+			const response = await axios.get("http://127.0.0.1:8080/api/cars/search", {
 				params: filters, // Send filters as query parameters
 			});
 			response.data.sort((a, b) => (a.brand > b.brand ? 1 : -1));

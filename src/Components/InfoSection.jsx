@@ -2,12 +2,11 @@ import { useState } from "react";
 import DealerOperations from "./DealerOperations";
 import Calendar from "./Calendar";
 
-function InfoSection() {
+function InfoSection({ isAgent }) {
 	const [date, setDate] = useState(new Date());
-	const isDealer = sessionStorage.getItem("isDealer");
 	return (
 		<div className="ms-4 min-w-fit">
-			{isDealer && <DealerOperations />}
+			{isAgent && <DealerOperations />}
 			<Calendar />
 		</div>
 	);
