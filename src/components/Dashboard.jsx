@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = ({ user, isAgent }) => {
   const navigate = useNavigate();
 
-  // Αν δεν υπάρχει χρήστης, ανακατευθύνει στην σελίδα σύνδεσης
+  useEffect(() => {
+    // Αν δεν υπάρχει χρήστης, ανακατευθύνει στην σελίδα σύνδεσης
+    if (!user) {
+      navigate('/');
+    }
+  }, [user, navigate]); // Το effect θα εκτελείται μόνο αν αλλάξει το 'user'
+
+  // Αν δεν υπάρχει χρήστης, επιστρέφει null μέχρι να γίνει η ανακατεύθυνση
   if (!user) {
-    navigate('/');
     return null;
   }
 

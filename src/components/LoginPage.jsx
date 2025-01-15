@@ -24,11 +24,7 @@ const LoginPage = ({ setUser, setIsAgent }) => {
     setLoading(true); // Ενεργοποίηση loader
 
     try {
-      console.log("Request body:", {
-        email: email,
-        password: password,
-      });
-
+      
       const queryString = new URLSearchParams({
         email: email,
         password: password
@@ -56,10 +52,14 @@ const LoginPage = ({ setUser, setIsAgent }) => {
       // Διαβάζουμε την απόκριση ως JSON, αφού η σύνδεση ήταν επιτυχής
       const data = await response.json();
       console.log('Backend Response:', data); // Ελέγχουμε τι επιστρέφει το backend
+      // Ελέγξτε την τιμή του isAgent πριν το στείλουμε στην App
+      console.log("isAgent Value:", data.isAgent); // Αυτό το log πρέπει να εμφανίζει σωστά την τιμή
+
+
 
       // Ρυθμίζουμε τον χρήστη και τον ρόλο
       setUser(data.user);
-      setIsAgent(data.isAgent);
+      setIsAgent(data.agent);
 
       // Αποθήκευση του token στο localStorage αν θέλεις να το χρησιμοποιήσεις αργότερα
       // localStorage.setItem('token', data.token);

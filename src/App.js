@@ -12,6 +12,11 @@ function App() {
   return (
     <Router>
       <Routes>
+      {/* Δίνουμε τις συναρτήσεις setUser και setIsAgent ως props στο LoginPage */}
+      <Route
+          path="/login"
+          element={<LoginPage setUser={setUser} setIsAgent={setIsAgent} />}
+        />
         {/* Δίνουμε τις συναρτήσεις setUser και setIsAgent ως props στο RegisterPage */}
         <Route
           path="/register"
