@@ -1,7 +1,7 @@
 function Calendar() {
 	return (
-		<div className="border">
-			<p>clendar</p>
+		<div className="">
+			<p>calendar</p>
 		</div>
 	);
 }

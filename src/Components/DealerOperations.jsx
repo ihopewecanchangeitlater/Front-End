@@ -1,7 +1,11 @@
+import Button from "@mui/material/Button";
+
 function DealerOperations() {
 	return (
-		<div className="border">
-			<button>Add new car</button>
+		<div className="">
+			<Button sx={{ minWidth: "fit" }} variant="contained">
+				Add new car
+			</Button>
 		</div>
 	);
 }

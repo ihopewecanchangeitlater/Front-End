@@ -1,18 +1,11 @@
-import Filters from "./Filters";
-import DataTable from "./DataTable";
-import DealerOperations from "./DealerOperations";
-import Calendar from "./Calendar";
+import DataSection from "./DataSection";
+import InfoSection from "./InfoSection";
 
 function Dashboard() {
-	const isDealer = sessionStorage.getItem("isDealer");
 	return (
-		<div className="dashboard">
-			<Filters />
-			<DataTable />
-			<div>
-				{isDealer && <DealerOperations />}
-				<Calendar />
-			</div>
+		<div className="h-full px-10 md:text-xl text-sm flex justify-between">
+			<DataSection />
+			<InfoSection />
 		</div>
 	);
 }
