@@ -22,18 +22,18 @@ const LoginPage = ({ setUser, setIsAgent }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true); // Ενεργοποίηση loader
-  
+
     try {
       console.log("Request body:", {
         email: email,
         password: password,
       });
-  
+
       const queryString = new URLSearchParams({
         email: email,
         password: password
       }).toString();
-  
+
       // Στέλνουμε το αίτημα με τα δεδομένα στην URL
       const response = await fetch(`${API_URL}/api/auth/login?${queryString}`, {
         method: 'POST',
@@ -41,24 +41,35 @@ const LoginPage = ({ setUser, setIsAgent }) => {
           'Content-Type': 'application/json',
         },
       });
-  
-      setLoading(false); // Σταματάμε το loader
-  
+
+      // Σταματάμε το loader
+      setLoading(false);
+
+      // Αν η απόκριση δεν είναι επιτυχής, προχωράμε με την απόκριση και εμφανίζουμε το μήνυμα λάθους
       if (!response.ok) {
-        // Αν η απόκριση δεν είναι ok, προσπαθούμε να διαβάσουμε το μήνυμα λάθους
-        const errorMessage = await response.text(); // Λαμβάνουμε το λάθος ως απλό κείμενο
-        setError(errorMessage || 'An error occurred. Please try again.'); // Εμφανίζουμε το μήνυμα
-        return; // Σταματάμε τη συνάρτηση αν υπάρχει σφάλμα
+        const errorMessage = await response.text();
+        console.log('Response Error:', errorMessage); // Προσθέτουμε log για να δούμε ακριβώς τι επιστρέφει το backend
+        setError(errorMessage || 'An error occurred. Please try again.');
+        return;
       }
-  
+
+      // Διαβάζουμε την απόκριση ως JSON, αφού η σύνδεση ήταν επιτυχής
       const data = await response.json();
-  
+      console.log('Backend Response:', data); // Ελέγχουμε τι επιστρέφει το backend
+
+      // Ρυθμίζουμε τον χρήστη και τον ρόλο
       setUser(data.user);
       setIsAgent(data.isAgent);
+
+      // Αποθήκευση του token στο localStorage αν θέλεις να το χρησιμοποιήσεις αργότερα
+      // localStorage.setItem('token', data.token);
+
+      // Ανακατεύθυνση στο Dashboard
       navigate('/dashboard');
     } catch (err) {
+      console.log('Catch Error:', err); // Πρόσθετο log για να δούμε αν έχουμε σφάλμα κατά την εκτέλεση
       setError('An error occurred. Please try again.');
-      setLoading(false); // Σταματάμε το loader
+      setLoading(false);
     }
   };
 

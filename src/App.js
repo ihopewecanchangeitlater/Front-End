@@ -17,12 +17,16 @@ function App() {
           path="/register"
           element={<RegisterPage setUser={setUser} setIsAgent={setIsAgent} />}
         />
+        {/* Δίνουμε τις συναρτήσεις setUser και setIsAgent ως props στο LoginPage */}
+        <Route
+          path="/"
+          element={<LoginPage setUser={setUser} setIsAgent={setIsAgent} />}
+        />
         {/* Μπορείς να χρησιμοποιήσεις το state του χρήστη και του ρόλου του στην σελίδα Dashboard */}
         <Route
           path="/dashboard"
           element={<Dashboard user={user} isAgent={isAgent} />}
         />
-        <Route path="/" element={<LoginPage />} />
       </Routes>
     </Router>
   );
