@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_URL = "http://localhost:8080"; // Η URL του backend
@@ -8,34 +8,57 @@ const LoginPage = ({ setUser, setIsAgent }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Για εμφάνιση/απόκρυψη κωδικού
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // Κατάσταση φόρτωσης
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Ελέγχει αν υπάρχει ήδη συνδεδεμένος χρήστης
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+    setLoading(true); // Ενεργοποίηση loader
+  
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      console.log("Request body:", {
+        email: email,
+        password: password,
+      });
+  
+      const queryString = new URLSearchParams({
+        email: email,
+        password: password
+      }).toString();
+  
+      // Στέλνουμε το αίτημα με τα δεδομένα στην URL
+      const response = await fetch(`${API_URL}/api/auth/login?${queryString}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUser(data.user);
-        setIsAgent(data.isAgent);
-        navigate('/dashboard'); // Ανακατεύθυνση στο Dashboard αν η είσοδος είναι επιτυχής
-      } else {
-        setError('User not found. Check your credentials or register.');
+  
+      setLoading(false); // Σταματάμε το loader
+  
+      if (!response.ok) {
+        // Αν η απόκριση δεν είναι ok, προσπαθούμε να διαβάσουμε το μήνυμα λάθους
+        const errorMessage = await response.text(); // Λαμβάνουμε το λάθος ως απλό κείμενο
+        setError(errorMessage || 'An error occurred. Please try again.'); // Εμφανίζουμε το μήνυμα
+        return; // Σταματάμε τη συνάρτηση αν υπάρχει σφάλμα
       }
+  
+      const data = await response.json();
+  
+      setUser(data.user);
+      setIsAgent(data.isAgent);
+      navigate('/dashboard');
     } catch (err) {
       setError('An error occurred. Please try again.');
+      setLoading(false); // Σταματάμε το loader
     }
   };
 
@@ -77,8 +100,9 @@ const LoginPage = ({ setUser, setIsAgent }) => {
           <button
             type="submit"
             className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 focus:outline-none"
+            disabled={loading}
           >
-            Login
+            {loading ? 'Loading...' : 'Login'}
           </button>
         </form>
         <p className="mt-4 text-center">
