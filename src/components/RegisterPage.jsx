@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = "http://localhost:8080"; // Η URL του backend
+
 const RegisterPage = ({ setUser, setIsAgent }) => {
   const [role, setRole] = useState('');
   const [formData, setFormData] = useState({
@@ -9,7 +11,7 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
     email: '',
     password: '',
     afm: '',
-    owner: '',
+    owner: '', // Προσθήκη πεδίου owner για τον agent
   });
   const navigate = useNavigate();
 
@@ -23,7 +25,8 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/api/${role === 'citizen' ? 'citizens' : 'agencies'}/register`, {
+      // Ενημερώνουμε το API endpoint ανάλογα με τον ρόλο
+      const response = await fetch(`${API_URL}/api/${role === 'citizen' ? 'citizens' : 'agencies'}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,17 +88,37 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Surname:</label>
-            <input
-              type="text"
-              name="surname"
-              value={formData.surname}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
+
+          {/* Εμφανίζεται το πεδίο surname μόνο αν ο ρόλος είναι citizen */}
+          {role === 'citizen' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Surname:</label>
+              <input
+                type="text"
+                name="surname"
+                value={formData.surname}
+                onChange={handleInputChange}
+                required
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          )}
+
+          {/* Εμφανίζεται το πεδίο owner name μόνο αν ο ρόλος είναι agent */}
+          {role === 'agent' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Owner Name:</label>
+              <input
+                type="text"
+                name="owner"
+                value={formData.owner}
+                onChange={handleInputChange}
+                required
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          )}
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Email:</label>
             <input
@@ -118,19 +141,7 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          {role === 'agent' && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Owner Name:</label>
-              <input
-                type="text"
-                name="owner"
-                value={formData.owner}
-                onChange={handleInputChange}
-                required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-          )}
+
           <button
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded-md w-full"

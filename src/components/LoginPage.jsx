@@ -3,58 +3,122 @@ import { useNavigate } from 'react-router-dom';
 
 const API_URL = "http://localhost:8080"; // Η URL του backend
 
-const LoginPage = ({ setUser, setIsAgent }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+const RegisterPage = ({ setUser, setIsAgent }) => {
+  const [role, setRole] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    surname: '',
+    email: '',
+    password: '',
+    afm: '',
+    owner: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);  // Για εμφάνιση κωδικού
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL}/api/auth/login?email=${email}&password=${password}`, {  // Χρησιμοποιείς query params στην URL
+      const response = await fetch(`${API_URL}/api/${role === 'citizen' ? 'citizens' : 'agencies'}/register`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-
       const data = await response.json();
       if (response.ok) {
-        setUser(data.user);
-        setIsAgent(data.isAgent);
-        navigate('/dashboard');  // Ανακατεύθυνση στο dashboard αν η είσοδος είναι επιτυχής
+        setUser(data);
+        setIsAgent(role === 'agent');
+        navigate('/dashboard');
       } else {
-        setError('User not found. Check your credentials or register.');  // Εμφάνιση σφάλματος αν αποτύχει η σύνδεση
+        alert('Registration failed.');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');  // Αν υπάρξει σφάλμα κατά τη διάρκεια του αιτήματος
+      console.error('Error:', err);
     }
   };
 
   return (
-    <div className="flex justify-center items-center bg-gray-100 min-h-screen p-6">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold mb-6 text-center">Login</h2>
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100 p-6">
+      <h2 className="text-2xl font-bold mb-4">Register</h2>
+      <div className="mb-4">
+        <button
+          onClick={() => setRole('citizen')}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+        >
+          Πολίτης
+        </button>
+        <button
+          onClick={() => setRole('agent')}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+        >
+          Αντιπρόσωπος
+        </button>
+      </div>
+
+      {role && (
+        <form onSubmit={handleRegister} className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">AFM:</label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="number"
+              name="afm"
+              value={formData.afm}
+              onChange={handleInputChange}
               required
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Name:</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Surname:</label>
+            <input
+              type="text"
+              name="surname"
+              value={formData.surname}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Email:</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Password:</label>
             <input
               type={showPassword ? 'text' : 'password'}
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
               required
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
             />
             <button
               type="button"
@@ -64,26 +128,29 @@ const LoginPage = ({ setUser, setIsAgent }) => {
               {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {role === 'agent' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Owner Name:</label>
+              <input
+                type="text"
+                name="owner"
+                value={formData.owner}
+                onChange={handleInputChange}
+                required
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          )}
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 focus:outline-none"
-          >
-            Login
-          </button>
-        </form>
-        <p className="mt-4 text-center">
-          Don't have an account?{' '}
-          <button
-            onClick={() => navigate('/register')}
-            className="text-blue-500 hover:underline"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md w-full"
           >
             Register
           </button>
-        </p>
-      </div>
+        </form>
+      )}
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
