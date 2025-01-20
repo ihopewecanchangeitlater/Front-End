@@ -5,18 +5,23 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { useNavigate } from "react-router-dom";
+import Loading from "./Loading";
 
 function DataTable({ data, loading }) {
+	const navigate = useNavigate();
 	return (
-		<div className="w-full">
+		<div
+			className={`w-full ${loading ? "flex justify-center items-center" : ""}`}
+		>
 			{loading ? (
-				<p>Loading...</p>
+				<Loading />
 			) : (
-				<TableContainer component={Paper}>
-					<Table
-						sx={{ minWidth: "fit", textWrap: "nowrap" }}
-						aria-label="simple table"
-					>
+				<TableContainer
+					sx={{ minWidth: "fit", minHeight: "fit", textWrap: "nowrap" }}
+					component={Paper}
+				>
+					<Table aria-label="simple table">
 						<TableHead>
 							<TableRow>
 								<TableCell>Brand</TableCell>
@@ -37,7 +42,7 @@ function DataTable({ data, loading }) {
 											"&:last-child td, &:last-child th": { border: 0 },
 										}}
 										onClick={() => {
-											window.location.href = "/car/" + car.id;
+											navigate("/car/" + car.id);
 										}}
 									>
 										<TableCell component="th" scope="row">
