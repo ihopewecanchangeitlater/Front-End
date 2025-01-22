@@ -1,8 +1,20 @@
 import "./App.css";
-import Dashboard from "./Components/Dashboard";
+import React, { useState } from "react";
+import {
+	BrowserRouter as Router,
+	Route,
+	Routes,
+	Navigate,
+} from "react-router-dom";
+import LoginPage from "./Components/LoginPage";
+import RegisterPage from "./Components/RegisterPage";
+import DashboardPage from "./Components/DashboardPage";
+import CarPage from "./Components/CarPage";
 
 function App() {
-	sessionStorage.setItem("isDealer", true);
+	// Ορίζουμε το state για τον χρήστη και τον ρόλο του (πολίτης ή αντιπρόσωπος)
+	const [user, setUser] = useState(null);
+	const [isAgent, setIsAgent] = useState(false);
 	return (
 		<Router>
 			<Routes>
@@ -16,12 +28,11 @@ function App() {
 					path="/register"
 					element={<RegisterPage setUser={setUser} setIsAgent={setIsAgent} />}
 				/>
-
 				<Route
-					path={`/dashboard`}
+					path="/dashboard"
 					element={<DashboardPage user={user} isAgent={isAgent} />}
 				/>
-				<Route path={`/car/:carId`} element={<CarPage isAgent={isAgent} />} />
+				<Route path="/car/:carId" element={<CarPage isAgent={isAgent} />} />
 			</Routes>
 		</Router>
 	);
