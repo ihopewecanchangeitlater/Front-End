@@ -4,7 +4,7 @@ import IconButton from "@mui/material/IconButton";
 
 const API_URL = "http://localhost:8080"; // Η URL του backend
 
-const RegisterPage = ({ setUser, setIsAgent }) => {
+const RegisterPage = ({ setUser }) => {
 	const [role, setRole] = useState("");
 	const [formData, setFormData] = useState({
 		name: "",
@@ -42,7 +42,7 @@ const RegisterPage = ({ setUser, setIsAgent }) => {
 			const data = await response.json();
 			if (response.ok) {
 				setUser(data);
-				setIsAgent(role === "agent");
+				// setIsAgent(role === "agent");
 				navigate("/dashboard");
 			} else {
 				alert("Registration failed.");

@@ -4,19 +4,27 @@ import DataSection from "./DataSection";
 import InfoSection from "./InfoSection";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { userSignOut } from "../Services/api";
 
-function DashboardPage({ user }) {
-	const [isAgent, setIsAgent] = useState(false);
+function DashboardPage() {
+	const [user, setUser] = useState(null);
 	const navigate = useNavigate();
 	useEffect(() => {
 		// Ελέγχει αν υπάρχει ήδη συνδεδεμένος χρήστης
 		const token = sessionStorage.getItem("token");
 		if (!token) {
-			navigate("/");
+			navigate("/", { replace: true });
 		} else {
-			setIsAgent(token.split(":")[0] === "true");
+			setUser(JSON.parse(sessionStorage.getItem("user")));
 		}
 	}, [navigate]);
+	
+	const signOutHandler = () => {
+		userSignOut();
+		sessionStorage.removeItem("token");
+		navigate("/", { replace: true });
+	};
+
 	return (
 		<div className="h-full w-full flex flex-col justify-center items-center">
 			<div className="absolute top-7 right-8">
@@ -29,7 +37,9 @@ function DashboardPage({ user }) {
 					className="text-xl"
 					variant="p"
 				>
-					{sessionStorage.getItem("email")}
+					{`${user?.name} ${user?.owner ? user?.owner : user?.surname} - (${
+						user?.email
+					})`}
 				</Typography>
 				<Button
 					sx={{
@@ -38,17 +48,14 @@ function DashboardPage({ user }) {
 						textWrap: "nowrap",
 					}}
 					variant="contained"
-					onClick={() => {
-						sessionStorage.removeItem("token");
-						navigate("/");
-					}}
+					onClick={signOutHandler}
 				>
 					Sing Out
 				</Button>
 			</div>
 			<div className="h-full w-full px-10 md:text-xl text-sm flex justify-between">
 				<DataSection />
-				<InfoSection show={isAgent} />
+				{/* <InfoSection show={isAgent} /> */}
 			</div>
 		</div>
 	);

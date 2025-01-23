@@ -25,7 +25,7 @@ function DataTable({ data, loading }) {
 						<TableHead>
 							<TableRow>
 								<TableCell>Brand</TableCell>
-								<TableCell align="right">Model</TableCell>
+								<TableCell>Model</TableCell>
 								<TableCell align="right">Price</TableCell>
 								<TableCell align="right">Engine</TableCell>
 								<TableCell align="right">Seats</TableCell>
@@ -45,10 +45,8 @@ function DataTable({ data, loading }) {
 											navigate("/car/" + car.id);
 										}}
 									>
-										<TableCell component="th" scope="row">
-											{car.brand}
-										</TableCell>
-										<TableCell align="right">{car.model}</TableCell>
+										<TableCell>{car.brand}</TableCell>
+										<TableCell>{car.model}</TableCell>
 										<TableCell align="right">{car.price}</TableCell>
 										<TableCell align="right">{car.engine}</TableCell>
 										<TableCell align="right">{car.seats}</TableCell>

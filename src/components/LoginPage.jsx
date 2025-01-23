@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-
-const API_URL = "http://localhost:8080"; // Η URL του backend
+import { userLogin } from "../Services/api";
 
 const LoginPage = ({ setUser, setIsAgent }) => {
 	const [email, setEmail] = useState("");
@@ -20,55 +19,43 @@ const LoginPage = ({ setUser, setIsAgent }) => {
 		}
 	}, [navigate]);
 
-	const handleLogin = async (e) => {
+	const handleLogin = (e) => {
+		// Παρακάμπτουμε την εκτέλεση του συμβάντος φόρμας
 		e.preventDefault();
-		setLoading(true); // Ενεργοποίηση loader
-
-		try {
-			// Στέλνουμε το αίτημα με τα δεδομένα στην URL
-			const response = await fetch(`${API_URL}/api/auth/login`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					email: email,
-					password: password,
-				}),
+		// Ενεργοποίηση loader
+		setLoading(true);
+		// Στέλνουμε το αίτημα με τα δεδομένα στην URL
+		userLogin({
+			email: email,
+			password: password,
+		})
+			.then((result) => {
+				// Διαβάζουμε την απόκριση ως JSON, αφού η σύνδεση ήταν επιτυχής
+				const { token, user } = result.data;
+				// Ελέγχουμε τι επιστρέφει το backend
+				console.log("Backend Response:", result);
+				sessionStorage.setItem("token", token);
+				// Ρυθμίζουμε τον χρήστη και τον ρόλο
+				if (user.roles[0] === "AGENCY") {
+					user.owner = user.customField;
+				} else {
+					user.surname = user.customField;
+				}
+				delete user.customField;
+				// setUser(user);
+				sessionStorage.setItem("user", JSON.stringify(user));
+				// Ανακατεύθυνση στο Dashboard
+				navigate("/dashboard", { replace: true });
+			})
+			.catch((error) => {
+				// Πρόσθετο log για να δούμε αν έχουμε σφάλμα κατά την εκτέλεση
+				console.log("Catch Error:", error);
+				setError("An error occurred. Please try again.");
+			})
+			.finally(() => {
+				// Σταματάμε το loader
+				setLoading(false);
 			});
-
-			// Σταματάμε το loader
-			setLoading(false);
-
-			// Αν η απόκριση δεν είναι επιτυχής, προχωράμε με την απόκριση και εμφανίζουμε το μήνυμα λάθους
-			if (!response.ok) {
-				const errorMessage = await response.text();
-				console.log("Response Error:", errorMessage); // Προσθέτουμε log για να δούμε ακριβώς τι επιστρέφει το backend
-				setError(errorMessage || "An error occurred. Please try again.");
-				return;
-			}
-
-			// Διαβάζουμε την απόκριση ως JSON, αφού η σύνδεση ήταν επιτυχής
-			const data = await response.json();
-			console.log("Backend Response:", data); // Ελέγχουμε τι επιστρέφει το backend
-			// Ελέγξτε την τιμή του isAgent πριν το στείλουμε στην App
-			console.log("isAgent Value:", data.isAgent); // Αυτό το log πρέπει να εμφανίζει σωστά την τιμή
-
-			// Ρυθμίζουμε τον χρήστη και τον ρόλο
-			setUser(data.user);
-			setIsAgent(data.agent);
-			sessionStorage.setItem("token", `${data.agent}:${data.user.afm}`);
-			sessionStorage.setItem("email", data.user.email);
-			// Αποθήκευση του token στο sessionStorage αν θέλεις να το χρησιμοποιήσεις αργότερα
-			// sessionStorage.setItem('token', data.token);
-
-			// Ανακατεύθυνση στο Dashboard
-			navigate("/dashboard");
-		} catch (err) {
-			console.log("Catch Error:", err); // Πρόσθετο log για να δούμε αν έχουμε σφάλμα κατά την εκτέλεση
-			setError("An error occurred. Please try again.");
-			setLoading(false);
-		}
 	};
 
 	return (
