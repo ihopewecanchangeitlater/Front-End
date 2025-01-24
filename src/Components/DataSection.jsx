@@ -1,41 +1,26 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import Filters from "./Filters";
 import DataTable from "./DataTable";
+import useFetch from "../Hooks/useFetch";
+import { CARS_SEARCH_URL } from "../Utils/Endpoints";
 
-function DataSection() {
-	const [filters, setFilters] = useState({});
-	const [data, setData] = useState([]);
-	const [loading, setLoading] = useState(true);
-
-	// Function to fetch data based on filters
-	const fetchData = async () => {
-		try {
-			const response = await axios.get(
-				`http://127.0.0.1:8080/api/cars/search`,
-				{
-					params: filters,
-				}
-			);
-			response.data.sort((a, b) => (a.brand > b.brand ? 1 : -1));
-			setData(response.data);
-		} catch (error) {
-			console.error("Error fetching data:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
-	// Fetch data when filters are updated
+function DataSection({ isAgent, userId }) {
+	const [initialParams, setInitialParams] = useState({});
+	const { data, loading, error, refetch } = useFetch(
+		CARS_SEARCH_URL,
+		{
+			method: "get",
+			requiresAuth: true,
+			params: initialParams,
+		},
+		false
+	);
 	useEffect(() => {
-		fetchData();
-	}, []);
+		if (isAgent) setInitialParams({ agency: userId });
+	}, [isAgent, userId]);
 	return (
 		<>
-			<Filters
-				filters={filters}
-				setFilters={setFilters}
-				fetchData={fetchData}
-			/>
+			<Filters fetchData={refetch} initialParams={initialParams} />
 			<DataTable data={data} loading={loading} />
 		</>
 	);

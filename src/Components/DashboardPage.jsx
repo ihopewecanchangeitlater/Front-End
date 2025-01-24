@@ -5,26 +5,30 @@ import InfoSection from "./InfoSection";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { userSignOut } from "../Services/api";
+import useToken from "../Hooks/useToken";
 
 function DashboardPage() {
+	const { token } = useToken();
 	const [user, setUser] = useState(null);
+	const [isAgent, setIsAgent] = useState(false);
 	const navigate = useNavigate();
+
 	useEffect(() => {
 		// Ελέγχει αν υπάρχει ήδη συνδεδεμένος χρήστης
-		const token = sessionStorage.getItem("token");
 		if (!token) {
-			navigate("/", { replace: true });
+			navigate("/");
 		} else {
-			setUser(JSON.parse(sessionStorage.getItem("user")));
+			const user = JSON.parse(sessionStorage.getItem("user"));
+			setUser(user);
+			setIsAgent(user.roles[0] === "AGENCY");
 		}
-	}, [navigate]);
-	
+	}, [token, navigate]);
+
 	const signOutHandler = () => {
 		userSignOut();
-		sessionStorage.removeItem("token");
-		navigate("/", { replace: true });
+		sessionStorage.clear();
+		navigate("/");
 	};
-
 	return (
 		<div className="h-full w-full flex flex-col justify-center items-center">
 			<div className="absolute top-7 right-8">
@@ -54,7 +58,7 @@ function DashboardPage() {
 				</Button>
 			</div>
 			<div className="h-full w-full px-10 md:text-xl text-sm flex justify-between">
-				<DataSection />
+				<DataSection isAgent={isAgent} userId={user?.afm} />
 				{/* <InfoSection show={isAgent} /> */}
 			</div>
 		</div>

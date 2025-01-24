@@ -1,63 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-import { userLogin } from "../Services/api";
+import useToken from "../Hooks/useToken";
+import useFetch from "../Hooks/useFetch";
+import { LOGIN_URL } from "../Utils/Endpoints";
 
-const LoginPage = ({ setUser, setIsAgent }) => {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [showPassword, setShowPassword] = useState(false); // Για εμφάνιση/απόκρυψη κωδικού
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false); // Κατάσταση φόρτωσης
+const LoginPage = () => {
 	const navigate = useNavigate();
-
+	const [email, setEmail] = useState("agency1@test.gr");
+	const [password, setPassword] = useState("1234");
+	const [showPassword, setShowPassword] = useState(false);
+	const { token, setToken } = useToken();
+	const { data, error, loading, refetch } = useFetch(
+		LOGIN_URL,
+		{ method: "post" },
+		false
+	);
 	useEffect(() => {
 		// Ελέγχει αν υπάρχει ήδη συνδεδεμένος χρήστης
-		const token = sessionStorage.getItem("token");
 		if (token) {
 			navigate("/dashboard");
 		}
-	}, [navigate]);
+	}, [token, navigate]);
 
-	const handleLogin = (e) => {
+	useEffect(() => {
+		if (data) {
+			const { token, user } = data;
+			// Ρυθμίζουμε τον χρήστη και τον ρόλο
+			if (user.roles[0] === "AGENCY") {
+				user.owner = user.customField;
+			} else {
+				user.surname = user.customField;
+			}
+			delete user.customField;
+			sessionStorage.setItem("user", JSON.stringify(user));
+			setToken(token);
+			// Ανακατεύθυνση στο Dashboard
+			navigate("/dashboard");
+		}
+	}, [data]);
+
+	const handleLogin = async (e) => {
 		// Παρακάμπτουμε την εκτέλεση του συμβάντος φόρμας
 		e.preventDefault();
-		// Ενεργοποίηση loader
-		setLoading(true);
-		// Στέλνουμε το αίτημα με τα δεδομένα στην URL
-		userLogin({
-			email: email,
-			password: password,
-		})
-			.then((result) => {
-				// Διαβάζουμε την απόκριση ως JSON, αφού η σύνδεση ήταν επιτυχής
-				const { token, user } = result.data;
-				// Ελέγχουμε τι επιστρέφει το backend
-				console.log("Backend Response:", result);
-				sessionStorage.setItem("token", token);
-				// Ρυθμίζουμε τον χρήστη και τον ρόλο
-				if (user.roles[0] === "AGENCY") {
-					user.owner = user.customField;
-				} else {
-					user.surname = user.customField;
-				}
-				delete user.customField;
-				// setUser(user);
-				sessionStorage.setItem("user", JSON.stringify(user));
-				// Ανακατεύθυνση στο Dashboard
-				navigate("/dashboard", { replace: true });
-			})
-			.catch((error) => {
-				// Πρόσθετο log για να δούμε αν έχουμε σφάλμα κατά την εκτέλεση
-				console.log("Catch Error:", error);
-				setError("An error occurred. Please try again.");
-			})
-			.finally(() => {
-				// Σταματάμε το loader
-				setLoading(false);
-			});
+		// Κάνουμε κλήση στον εξυπηρετητή
+		refetch({ data: { email: email, password: password } });
 	};
-
 	return (
 		<div className="flex justify-center items-center drop-shadow-2xl h-full p-6 w-1/2">
 			<div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -128,7 +116,7 @@ const LoginPage = ({ setUser, setIsAgent }) => {
 							)}
 						</IconButton>
 					</div>
-					{error && <p className="text-red-500 text-sm">{error}</p>}
+					{error && <p className="text-red-500 text-sm">{error.message}</p>}
 					<button
 						type="submit"
 						className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 focus:outline-none"

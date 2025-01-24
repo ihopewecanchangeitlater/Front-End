@@ -10,11 +10,14 @@ import Loading from "./Loading";
 
 function DataTable({ data, loading }) {
 	const navigate = useNavigate();
+	console.log(data);
 	return (
 		<div
-			className={`w-full ${loading ? "flex justify-center items-center" : ""}`}
+			className={`w-full ${
+				loading && !data ? "flex justify-center items-center" : ""
+			}`}
 		>
-			{loading ? (
+			{loading && !data ? (
 				<Loading />
 			) : (
 				<TableContainer
@@ -33,7 +36,7 @@ function DataTable({ data, loading }) {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{data.length > 0 ? (
+							{data?.length > 0 ? (
 								data.map((car) => (
 									<TableRow
 										key={car.id}

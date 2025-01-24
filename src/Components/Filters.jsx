@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Button from "@mui/material/Button";
 import NativeSelect from "@mui/material/NativeSelect";
 import Input from "@mui/material/Input";
@@ -7,10 +8,13 @@ const sx = {
 	marginBottom: "1rem",
 };
 
-function Filters({ filters, setFilters, fetchData }) {
+function Filters({ fetchData, initialParams }) {
+	const [filters, setFilters] = useState(initialParams);
 	const formSubmition = (e) => {
 		e.preventDefault();
-		fetchData();
+		fetchData({
+			params: filters,
+		});
 	};
 	const handleFilterChange = (e) => {
 		const { name, value } = e.target;
@@ -33,7 +37,7 @@ function Filters({ filters, setFilters, fetchData }) {
 				type="text"
 				name="brand"
 				placeholder="Brand"
-				value={filters.brand}
+				value={filters.brand || ""}
 				onChange={handleFilterChange}
 			/>
 			<Input
@@ -41,7 +45,7 @@ function Filters({ filters, setFilters, fetchData }) {
 				type="text"
 				name="model"
 				placeholder="Model"
-				value={filters.model}
+				value={filters.model || ""}
 				onChange={handleFilterChange}
 			/>
 			<Input
@@ -49,7 +53,7 @@ function Filters({ filters, setFilters, fetchData }) {
 				type="number"
 				name="price"
 				placeholder="Price (max)"
-				value={filters.price}
+				value={filters.price || ""}
 				onChange={handleFilterChange}
 			/>
 			<Input
@@ -57,7 +61,7 @@ function Filters({ filters, setFilters, fetchData }) {
 				type="number"
 				name="engine"
 				placeholder="Engine"
-				value={filters.engine}
+				value={filters.engine || ""}
 				onChange={handleFilterChange}
 			/>
 			<Input
@@ -65,12 +69,12 @@ function Filters({ filters, setFilters, fetchData }) {
 				type="number"
 				name="seats"
 				placeholder="Seats"
-				value={filters.seats}
+				value={filters.seats || ""}
 				onChange={handleFilterChange}
 			/>
 			<NativeSelect
 				sx={sx}
-				defaultValue={filters.fuel}
+				defaultValue={filters.fuel || ""}
 				inputProps={{
 					name: "fuel",
 					id: "uncontrolled-native",

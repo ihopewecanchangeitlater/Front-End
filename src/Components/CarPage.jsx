@@ -24,7 +24,7 @@ const style = {
 	borderRadius: "0.75rem",
 };
 
-const CarPage = () => {
+const CarPage = ({ token }) => {
 	const params = useParams();
 	const { carId } = params;
 	const [car, setCar] = useState(null); // Πληροφορίες αυτοκινήτου
