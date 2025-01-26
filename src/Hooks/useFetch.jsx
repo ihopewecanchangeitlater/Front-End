@@ -3,6 +3,8 @@ import axios from "axios";
 import useToken from "./useToken";
 import { BASE_URL } from "../Utils/Endpoints";
 
+axios.defaults.baseURL = BASE_URL;
+
 const useFetch = (url, options = {}, immediate = true) => {
 	const { token } = useToken();
 	const [data, setData] = useState(null); // Response data
@@ -11,7 +13,7 @@ const useFetch = (url, options = {}, immediate = true) => {
 
 	// Function to execute the fetch request
 	const fetchData = useCallback(
-		async (requestOptions = {}) => {
+		async (requestOptions = {}, pathVariables = []) => {
 			setLoading(true);
 			setError(null);
 			try {
@@ -20,13 +22,16 @@ const useFetch = (url, options = {}, immediate = true) => {
 				const authHeaders =
 					requiresAuth && token ? { Authorization: `Bearer ${token}` } : {};
 				const params = {
-					url: `${BASE_URL}${url}`,
+					url: `${url}${
+						pathVariables.length > 0 ? "/" + pathVariables.join("/") : ""
+					}`,
 					...options,
 					headers: {
 						...authHeaders, // Add the auth header conditionally
 					},
 					...requestOptions,
 				};
+
 				console.log(params);
 				const response = await axios(params);
 				setData(response.data);

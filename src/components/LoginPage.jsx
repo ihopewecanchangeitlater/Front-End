@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import useToken from "../Hooks/useToken";
 import useFetch from "../Hooks/useFetch";
-import { LOGIN_URL } from "../Utils/Endpoints";
+import { AUTH_LOGIN_URL } from "../Utils/Endpoints";
 
 const LoginPage = () => {
 	const navigate = useNavigate();
-	const [email, setEmail] = useState("agency1@test.gr");
-	const [password, setPassword] = useState("1234");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const { token, setToken } = useToken();
 	const { data, error, loading, refetch } = useFetch(
-		LOGIN_URL,
+		AUTH_LOGIN_URL,
 		{ method: "post" },
 		false
 	);

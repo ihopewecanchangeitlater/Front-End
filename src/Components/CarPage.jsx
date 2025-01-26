@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { getCarById, updateCarQuantity, buyCar } from "../Services/api";
 import { useNavigate, useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
-import axios from "axios";
 import moment from "moment";
 import Loading from "./Loading";
+import useToken from "../Hooks/useToken";
+import useFetch from "../Hooks/useFetch";
+import Input from "@mui/material/Input";
+import { QUANTITY_PROPS } from "../Utils/InputProps";
+import {
+	CARS_QUANTITY_URL,
+	CARS_URL,
+	RESERVATIONS_URL,
+	RESERVATIONS_CAR_URL,
+	CARS_BUY_URL,
+} from "../Utils/Endpoints";
 
 const style = {
 	position: "absolute",
@@ -24,106 +33,164 @@ const style = {
 	borderRadius: "0.75rem",
 };
 
-const CarPage = ({ token }) => {
+const CarPage = () => {
+	const { token } = useToken();
 	const params = useParams();
-	const { carId } = params;
 	const [car, setCar] = useState(null); // Πληροφορίες αυτοκινήτου
 	const [quantity, setQuantity] = useState(0); // Τρέχουσα ποσότητα από τη βάση
 	const [newQuantity, setNewQuantity] = useState(0); // Τοπική ποσότητα για εισαγωγή
 	const [testDriveCars, setTestDriveCars] = useState(0); // Αριθμός αυτοκινήτων σε test drive
-	const [isModalVisible, setIsModalVisible] = useState(false); // Αριθμός αυτοκινήτων σε test drive
-	const [date, setDate] = useState(""); // Τοπική ποσότητα για εισαγωγή
-	const [time, setTime] = useState(""); // Αριθμός αυτοκινήτων σε test drive
-	const [isAgent, setIsAgent] = useState(false);
-
+	const [isCustomerModalVisible, setIsCustomerModalVisible] = useState(false); // Αριθμός αυτοκινήτων σε test drive
+	const [isAgentModalVisible, setIsAgentModalVisible] = useState(false); // Αριθμός αυτοκινήτων σε test drive
+	const [date, setDate] = useState("");
+	const [time, setTime] = useState("");
+	const [customerTestDrive, setCustomerTestDrive] = useState("");
+	const [isAgent, setIsAgent] = useState(null);
+	const [userId, setUserId] = useState("");
 	const navigate = useNavigate();
+	const { carId } = params;
+	const {
+		data: carData,
+		loading: carLoading,
+		error: carError,
+	} = useFetch(`${CARS_URL}/${carId}`, {
+		method: "get",
+		requiresAuth: true,
+	});
+	const {
+		loading: reservationLoading,
+		error: reservationError,
+		refetch: reservationRefetch,
+	} = useFetch(
+		`${RESERVATIONS_URL}`,
+		{
+			method: "post",
+			requiresAuth: true,
+		},
+		false
+	);
+	const { data: reservationCarData } = useFetch(
+		`${RESERVATIONS_CAR_URL}/${carId}`,
+		{
+			method: "get",
+			requiresAuth: true,
+		}
+	);
+	const {
+		loading: quantityLoading,
+		error: quantityError,
+		refetch: quantityRefetch,
+	} = useFetch(
+		`${CARS_QUANTITY_URL}/${carId}`,
+		{
+			method: "patch",
+			requiresAuth: true,
+		},
+		false
+	);
+	const { error: buyCarError, refetch: buyCarRefetch } = useFetch(
+		`${CARS_BUY_URL}/${carId}`,
+		{
+			method: "patch",
+			requiresAuth: true,
+		},
+		false
+	);
+	const { error: reservationDeleteError, refetch: reservationDeleteRefetch } =
+		useFetch(
+			`${RESERVATIONS_URL}`,
+			{
+				method: "delete",
+				requiresAuth: true,
+			},
+			false
+		);
 
 	useEffect(() => {
-		const fetchCar = async () => {
-			try {
-				const response = await getCarById(carId);
-				setCar(response.data);
-				setQuantity(response.data.quantity); // Τρέχουσα ποσότητα
-				setNewQuantity(response.data.quantity); // Τοπική ποσότητα αρχικά ίδια με την τρέχουσα
-			} catch (error) {
-				console.error("Error fetching car:", error);
-			}
-		}; // Ελέγχει αν υπάρχει ήδη συνδεδεμένος χρήστης
-		const token = sessionStorage.getItem("token");
+		// Ελέγχει αν υπάρχει ήδη συνδεδεμένος χρήστης
 		if (!token) {
 			navigate("/");
 		} else {
-			setIsAgent(token.split(":")[0] === "true");
-			fetchCar();
+			const user = JSON.parse(sessionStorage.getItem("user"));
+			setUserId(user.afm);
+			setIsAgent(user.roles[0] === "AGENCY");
 		}
-	}, [carId, navigate]);
+	}, [carId]);
+
+	useEffect(() => {
+		if (carData) {
+			setCar(carData);
+			setQuantity(carData.quantity); // Τρέχουσα ποσότητα
+		}
+	}, [carData]);
+
+	useEffect(() => {
+		if (reservationCarData) setTestDriveCars(reservationCarData.length);
+	}, [reservationCarData, quantity]);
 
 	// Ενημέρωση ποσότητας αυτοκινήτων στην βάση
-	const handleUpdateQuantity = async () => {
-		try {
-			await updateCarQuantity(carId, { quantity: newQuantity });
+	const handleUpdateQuantity = () => {
+		quantityRefetch({
+			data: {
+				quantity: newQuantity,
+			},
+		});
+		if (!quantityError) {
 			setQuantity(newQuantity); // Ενημέρωση της τρέχουσας ποσότητας μόνο μετά την επιτυχή αποστολή
+			setNewQuantity(0);
 			alert("Quantity updated successfully!");
-		} catch (error) {
-			console.error("Error updating quantity:", error);
+		} else {
+			alert("Error updating quantity");
 		}
 	};
 
 	// Λειτουργία Test Drive (παίρνει ΜΟΝΟ ένα αμάξι για test drive)
-	const handleTestDrive = async () => {
-		const response = await axios.post(
-			"http://localhost:8080/api/reservations",
-			{
-				carId: car.id,
-				citizenId: sessionStorage.getItem("token").split(":")[1],
+	const handleTestDrive = () => {
+		reservationRefetch({
+			data: {
+				carId: car?.id,
+				citizenId: userId,
 				date: date,
 				time: time,
-			}
-		);
-		if (response.status === 200) {
+			},
+		});
+		if (!reservationError) {
 			alert("Test Drive arranged successfully");
+			window.location.reload();
 		} else {
 			alert("Test Drive arrangment failed");
 		}
 	};
 
-	// Αγορά αυτοκινήτου (μείωση της ποσότητας κατά 1)
-	// Εάν έχει αυτοκίνητο σε test drive, δεν μπορεί να αγοράσει άλλο
-	const handleBuyCar = async () => {
-		if (testDriveCars > 0) {
-			alert("You must return the test drive car before buying!");
-			return;
-		}
-
-		if (quantity > 0) {
-			try {
-				await buyCar(carId);
-				setQuantity(quantity - 1); // Μείωση της ποσότητας κατά 1
-				alert("Car bought successfully!");
-			} catch (error) {
-				console.error("Error buying car:", error);
-			}
-		} else {
-			alert("No cars available for purchase!");
+	const handleTestDriveConfirm = () => {
+		reservationDeleteRefetch({}, [customerTestDrive]);
+		if (reservationDeleteError) {
+			alert("Failed to confirm test drive");
 		}
 	};
 
-	// Επιστροφή αμαξιού από test drive
-	const handleCarReturn = () => {
-		if (testDriveCars > 0) {
-			setQuantity(quantity + 1);
-			setTestDriveCars(testDriveCars - 1);
-			alert("Car returned successfully!");
+	// Αγορά αυτοκινήτου (μείωση της ποσότητας κατά 1)
+	// Εάν έχει αυτοκίνητο σε test drive, δεν μπορεί να αγοράσει άλλο
+	const handleBuyCar = () => {
+		buyCarRefetch();
+		if (!buyCarError) {
+			alert("Car bought successfully!");
+			window.location.reload();
 		} else {
-			alert("No cars to return!");
+			alert("Car buy failed");
 		}
+	};
+
+	const handleCarReturn = () => {
+		setIsAgentModalVisible(true);
 	};
 
 	const handleCancel = () => {
 		navigate("/dashboard"); // Επιστροφή στο Dashboard (όταν έχει κάτι να επιστρέψει)
 	};
 
-	if (!car) return <Loading />;
+	if (isAgent == null || carLoading || reservationLoading || quantityLoading)
+		return <Loading />;
 
 	// Εδώ προστέθηκε Talwind CSS
 	return (
@@ -131,7 +198,7 @@ const CarPage = ({ token }) => {
 			{/* Πληροφορίες Αυτοκινήτου */}
 			<div className="grid grid-cols-2 grid-rows-5 items-center justify-items-center bg-beige-200 p-4 rounded-lg shadow-md flex-grow">
 				<Typography variant="h4" className="col-span-2 justify-self-center">
-					{car.brand} {car.model}
+					{car?.brand} {car?.model}
 				</Typography>
 				<div className="w-full h-full flex flex-col justify-center items-center">
 					<Typography>Fuel Type:</Typography>
@@ -139,7 +206,7 @@ const CarPage = ({ token }) => {
 						className="text-center"
 						type="text"
 						disabled
-						value={car.fuel}
+						value={car?.fuel}
 					/>
 				</div>
 				<div className="w-full h-full flex flex-col justify-center items-center">
@@ -148,7 +215,7 @@ const CarPage = ({ token }) => {
 						className="text-center"
 						type="text"
 						disabled
-						value={car.engine}
+						value={car?.engine}
 					/>
 				</div>
 				<div className="w-full h-full flex flex-col justify-center items-center">
@@ -157,7 +224,7 @@ const CarPage = ({ token }) => {
 						className="text-center"
 						type="text"
 						disabled
-						value={car.seats}
+						value={car?.seats}
 					/>
 				</div>
 				<div className="w-full h-full flex flex-col justify-center items-center">
@@ -166,7 +233,7 @@ const CarPage = ({ token }) => {
 						className="text-center"
 						type="text"
 						disabled
-						value={car.price}
+						value={car?.price}
 					/>
 				</div>
 				<div className="w-full h-full flex flex-col justify-center items-center">
@@ -175,7 +242,7 @@ const CarPage = ({ token }) => {
 						className="text-center"
 						type="text"
 						disabled
-						value={car.additionalInfo ? car.additionalInfo : ""}
+						value={car?.additionalInfo ? car?.additionalInfo : ""}
 					/>
 				</div>
 				<div className="w-full h-full flex flex-col justify-center items-center">
@@ -188,20 +255,25 @@ const CarPage = ({ token }) => {
 					/>
 				</div>
 				<Typography className="col-span-2 justify-self-center">
-					Cars in Test Drive: {testDriveCars}
+					Test drive reservations: {testDriveCars}
 				</Typography>
 			</div>
 
 			{/* Κουμπιά */}
 			<div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
 				{isAgent ? (
-					<div>
-						<h2 className="text-xl font-semibold mb-2">Update Quantity</h2>
-						<input
-							className="text-center border p-2 rounded-md w-full mb-2"
+					<div className="flex flex-col justify-center">
+						<h2 className="text-xl text-center font-semibold mb-2">
+							Update Quantity
+						</h2>
+						<Input
+							sx={{
+								mb: 2,
+							}}
 							type="number"
 							value={newQuantity}
 							onChange={(e) => setNewQuantity(Number(e.target.value))}
+							inputProps={{ ...QUANTITY_PROPS, style: { textAlign: "center" } }}
 						/>
 						<button
 							onClick={handleUpdateQuantity}
@@ -220,7 +292,7 @@ const CarPage = ({ token }) => {
 						</button>
 						<button
 							onClick={() => {
-								setIsModalVisible(true);
+								setIsCustomerModalVisible(true);
 							}}
 							className="text-nowrap w-24 bg-yellow-500 text-white px-4 py-2 rounded-md"
 						>
@@ -230,12 +302,12 @@ const CarPage = ({ token }) => {
 				)}
 
 				{/* Εμφάνιση του κουμπιού Car Return μόνο αν δεν είναι agent */}
-				{!isAgent && (
+				{isAgent && (
 					<button
 						onClick={handleCarReturn}
 						className="bg-red-500 text-white px-4 py-2 rounded-md"
 					>
-						Car Return
+						Test Drive Return
 					</button>
 				)}
 
@@ -247,8 +319,8 @@ const CarPage = ({ token }) => {
 				</button>
 			</div>
 			<Modal
-				open={isModalVisible}
-				onClose={() => setIsModalVisible(false)}
+				open={isCustomerModalVisible}
+				onClose={() => setIsCustomerModalVisible(false)}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
@@ -259,7 +331,7 @@ const CarPage = ({ token }) => {
 						component="h2"
 						sx={{ alignSelf: "center" }}
 					>
-						Test Drive {`${car.brand} ${car.model}`}
+						Test Drive {`${car?.brand} ${car?.model}`}
 					</Typography>
 					<Typography
 						id="modal-modal-description"
@@ -286,10 +358,60 @@ const CarPage = ({ token }) => {
 						variant="contained"
 						onClick={() => {
 							handleTestDrive();
-							setIsModalVisible(false);
+							setIsCustomerModalVisible(false);
 						}}
 					>
 						Book
+					</Button>
+				</Box>
+			</Modal>
+			<Modal
+				open={isAgentModalVisible}
+				onClose={() => setIsAgentModalVisible(false)}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<Box sx={style}>
+					<Typography
+						id="modal-modal-title"
+						variant="h6"
+						component="h2"
+						sx={{ alignSelf: "center" }}
+					>
+						Test Drive {`${car?.brand} ${car?.model}`}
+					</Typography>
+					<Typography
+						id="modal-modal-description"
+						sx={{ mt: 2, alignSelf: "center" }}
+					>
+						Provide customer AFM and date of Test Drive
+					</Typography>
+					{reservationCarData && (
+						<select
+							className="w-full h-10 mx-2 my-4"
+							value={customerTestDrive}
+							onChange={(event) => setCustomerTestDrive(event.target.value)}
+						>
+							<option value="" disabled>
+								Select test drive
+							</option>
+							{reservationCarData.map((reservation) => (
+								<option
+									key={reservation.id}
+									value={reservation.id}
+								>{`${reservation.date} | ${reservation.citizen.afm} | ${reservation.citizen.email}`}</option>
+							))}
+						</select>
+					)}
+					<Button
+						sx={{ width: "50%", alignSelf: "center", mt: 2 }}
+						variant="contained"
+						onClick={() => {
+							handleTestDriveConfirm();
+							setIsAgentModalVisible(false);
+						}}
+					>
+						Confirm
 					</Button>
 				</Box>
 			</Modal>

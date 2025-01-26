@@ -4,24 +4,25 @@ import DataTable from "./DataTable";
 import useFetch from "../Hooks/useFetch";
 import { CARS_SEARCH_URL } from "../Utils/Endpoints";
 
-function DataSection({ isAgent, userId }) {
-	const [initialParams, setInitialParams] = useState({});
+function DataSection({ isAgent, userId, refresh }) {
 	const { data, loading, error, refetch } = useFetch(
 		CARS_SEARCH_URL,
 		{
 			method: "get",
 			requiresAuth: true,
-			params: initialParams,
 		},
 		false
 	);
-	useEffect(() => {
-		if (isAgent) setInitialParams({ agency: userId });
-	}, [isAgent, userId]);
 	return (
 		<>
-			<Filters fetchData={refetch} initialParams={initialParams} />
-			<DataTable data={data} loading={loading} />
+			<Filters
+				fetchData={refetch}
+				isAgent={isAgent}
+				userId={userId}
+				isLoading={loading}
+				refresh={refresh}
+			/>
+			<DataTable data={data} loading={loading} isAgent={isAgent} />
 		</>
 	);
 }

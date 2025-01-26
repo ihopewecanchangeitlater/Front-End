@@ -1,21 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-
-const API_URL = "http://localhost:8080"; // Η URL του backend
+import useFetch from "../Hooks/useFetch";
+import { AUTH_REGISTER_URL } from "../Utils/Endpoints";
 
 const RegisterPage = () => {
 	const [role, setRole] = useState("");
-	const [formData, setFormData] = useState({
-		name: "",
-		surname: "",
-		email: "",
-		password: "",
-		afm: "",
-		owner: "",
-	});
+	const [formData, setFormData] = useState({});
 	const [showPassword, setShowPassword] = useState(false); // Για εμφάνιση κωδικού
 	const navigate = useNavigate();
+	const { data, error, refetch } = useFetch(
+		`${AUTH_REGISTER_URL}`,
+		{ method: "post" },
+		false
+	);
 
 	const handleInputChange = (e) => {
 		setFormData({
@@ -26,29 +24,13 @@ const RegisterPage = () => {
 
 	const handleRegister = async (e) => {
 		e.preventDefault();
-		try {
-			const response = await fetch(
-				`${API_URL}/api/${
-					role === "citizen" ? "citizens" : "agencies"
-				}/register`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(formData),
-				}
-			);
-			const data = await response.json();
-			if (response.ok) {
-				// setUser(data);
-				// setIsAgent(role === "agent");
-				navigate("/dashboard");
-			} else {
-				alert("Registration failed.");
-			}
-		} catch (err) {
-			console.error("Error:", err);
+		refetch({ data: formData }, [role]);
+		console.log(data, error);
+		if (!error && data) {
+			navigate("/login");
+		} else {
+			console.log(error);
+			alert("Registration failed.");
 		}
 	};
 	return (
@@ -85,7 +67,7 @@ const RegisterPage = () => {
 						<input
 							type="text"
 							name="afm"
-							value={formData.afm}
+							value={formData.afm || ""}
 							onChange={handleInputChange}
 							required
 							className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
@@ -99,7 +81,7 @@ const RegisterPage = () => {
 							<input
 								type="text"
 								name="name"
-								value={formData.name}
+								value={formData.name || ""}
 								onChange={handleInputChange}
 								required
 								className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
@@ -112,7 +94,13 @@ const RegisterPage = () => {
 							<input
 								type="text"
 								name={role === "citizen" ? "surname" : "owner"}
-								value={role === "citizen" ? formData.surname : formData.owner}
+								value={
+									role === "citizen"
+										? formData.surname
+										: role !== ""
+										? formData.owner
+										: ""
+								}
 								onChange={handleInputChange}
 								required
 								className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
@@ -127,7 +115,7 @@ const RegisterPage = () => {
 							<input
 								type="email"
 								name="email"
-								value={formData.email}
+								value={formData.email || ""}
 								onChange={handleInputChange}
 								required
 								className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
@@ -140,7 +128,7 @@ const RegisterPage = () => {
 							<input
 								type={showPassword ? "text" : "password"}
 								name="password"
-								value={formData.password}
+								value={formData.password || ""}
 								onChange={handleInputChange}
 								required
 								className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
@@ -149,7 +137,7 @@ const RegisterPage = () => {
 								type="button"
 								onClick={() => setShowPassword(!showPassword)}
 								color="primary"
-								className="mt-2 relative left-64 bottom-10"
+								className="mt-2 absolute left-[82.5%] bottom-10"
 							>
 								{showPassword ? (
 									<svg

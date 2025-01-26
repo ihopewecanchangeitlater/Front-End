@@ -4,13 +4,16 @@ import DataSection from "./DataSection";
 import InfoSection from "./InfoSection";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { userSignOut } from "../Services/api";
 import useToken from "../Hooks/useToken";
+import useFetch from "../Hooks/useFetch";
+import { AUTH_LOGOUT_URL } from "../Utils/Endpoints";
 
 function DashboardPage() {
 	const { token } = useToken();
 	const [user, setUser] = useState(null);
 	const [isAgent, setIsAgent] = useState(false);
+	const [refresh, setRefresh] = useState(false);
+	const { refetch } = useFetch(`${AUTH_LOGOUT_URL}`, { method: "post" }, false);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -25,7 +28,7 @@ function DashboardPage() {
 	}, [token, navigate]);
 
 	const signOutHandler = () => {
-		userSignOut();
+		refetch();
 		sessionStorage.clear();
 		navigate("/");
 	};
@@ -57,10 +60,16 @@ function DashboardPage() {
 					Sing Out
 				</Button>
 			</div>
-			<div className="h-full w-full px-10 md:text-xl text-sm flex justify-between">
-				<DataSection isAgent={isAgent} userId={user?.afm} />
-				{/* <InfoSection show={isAgent} /> */}
-			</div>
+			{isAgent != null && user && (
+				<div className="h-full w-full px-10 md:text-xl text-sm flex justify-between">
+					<DataSection isAgent={isAgent} userId={user?.afm} refresh={refresh} />
+					<InfoSection
+						show={isAgent}
+						userId={user?.afm}
+						setRefresh={setRefresh}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }

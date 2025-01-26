@@ -4,3 +4,14 @@
 	justify-content: center;
 	align-items: center;
 }
+
+.modal-row {
+	display: flex;
+	justify-content: center;
+}
+
+.modal-row-element {
+	display: flex;
+	flex-direction: column;
+	width: 50%;
+}
