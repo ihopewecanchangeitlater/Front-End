@@ -6,10 +6,8 @@ import {
 	Routes,
 	Navigate,
 } from "react-router-dom";
-import LoginPage from "./Components/LoginPage";
-import RegisterPage from "./Components/RegisterPage";
-import DashboardPage from "./Components/DashboardPage";
-import CarPage from "./Components/CarPage";
+import { LoginPage, RegisterPage } from "./Components/Authentication";
+import { DashboardPage, CarPage } from "./Components/Pages";
 
 function App() {
 	return (

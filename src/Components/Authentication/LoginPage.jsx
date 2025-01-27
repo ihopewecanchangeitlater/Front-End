@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-import useToken from "../Hooks/useToken";
-import useFetch from "../Hooks/useFetch";
-import { AUTH_LOGIN_URL } from "../Utils/Endpoints";
+import useToken from "../../Hooks/useToken";
+import useFetch from "../../Hooks/useFetch";
+import { AUTH_LOGIN_URL } from "../../Utils/Endpoints";
 
 const LoginPage = () => {
 	const navigate = useNavigate();

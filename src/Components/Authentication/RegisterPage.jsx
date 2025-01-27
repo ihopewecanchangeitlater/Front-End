@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-import useFetch from "../Hooks/useFetch";
-import { AUTH_REGISTER_URL } from "../Utils/Endpoints";
+import useFetch from "../../Hooks/useFetch";
+import { AUTH_REGISTER_URL } from "../../Utils/Endpoints";
 
 const RegisterPage = () => {
 	const [role, setRole] = useState("");

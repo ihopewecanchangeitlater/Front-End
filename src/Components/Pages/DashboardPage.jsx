@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DataSection from "./DataSection";
-import InfoSection from "./InfoSection";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import useToken from "../Hooks/useToken";
-import useFetch from "../Hooks/useFetch";
-import { AUTH_LOGOUT_URL } from "../Utils/Endpoints";
+import { DataSection, InfoSection } from "../Containers";
+import { useToken, useFetch } from "../../Hooks";
+import { Endpoints } from "../../Utils";
+import { Button, Typography } from "@mui/material";
 
 function DashboardPage() {
 	const { token } = useToken();
 	const [user, setUser] = useState(null);
 	const [isAgent, setIsAgent] = useState(false);
 	const [refresh, setRefresh] = useState(false);
-	const { refetch } = useFetch(`${AUTH_LOGOUT_URL}`, { method: "post" }, false);
+	const { refetch } = useFetch(
+		`${Endpoints.AUTH_LOGOUT_URL}`,
+		{ method: "post" },
+		false
+	);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -61,7 +62,7 @@ function DashboardPage() {
 				</Button>
 			</div>
 			{isAgent != null && user && (
-				<div className="h-full w-full px-10 md:text-xl text-sm flex justify-between">
+				<div className="h-full w-full ps-10 pe-2 md:text-xl text-sm flex justify-between">
 					<DataSection isAgent={isAgent} userId={user?.afm} refresh={refresh} />
 					<InfoSection
 						show={isAgent}

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import Button from "@mui/material/Button";
-import NativeSelect from "@mui/material/NativeSelect";
-import Input from "@mui/material/Input";
-import { ENGINE_PROPS, PRICE_PROPS, SEATS_PROPS } from "../Utils/InputProps";
+import { Button, NativeSelect, Input } from "@mui/material";
+import { InputProps } from "../../Utils";
 
 const sx = {
 	marginTop: "1rem",
@@ -11,7 +9,6 @@ const sx = {
 
 function Filters({ fetchData, isAgent, userId, isLoading, refresh }) {
 	const [filters, setFilters] = useState(isAgent ? { agency: userId } : {});
-	const [price, setPrice] = useState(0);
 	const formSubmition = (e) => {
 		e.preventDefault();
 		fetchData({
@@ -58,7 +55,7 @@ function Filters({ fetchData, isAgent, userId, isLoading, refresh }) {
 				type="number"
 				name="price"
 				placeholder="Price (max)"
-				inputProps={PRICE_PROPS}
+				inputProps={InputProps.PRICE_PROPS}
 				value={filters.price || ""}
 				onChange={handleFilterChange}
 			/>
@@ -67,7 +64,7 @@ function Filters({ fetchData, isAgent, userId, isLoading, refresh }) {
 				type="number"
 				name="engine"
 				placeholder="Engine"
-				inputProps={ENGINE_PROPS}
+				inputProps={InputProps.ENGINE_PROPS}
 				value={filters.engine || ""}
 				onChange={handleFilterChange}
 			/>
@@ -76,7 +73,7 @@ function Filters({ fetchData, isAgent, userId, isLoading, refresh }) {
 				type="number"
 				name="seats"
 				placeholder="Seats"
-				inputProps={SEATS_PROPS}
+				inputProps={InputProps.SEATS_PROPS}
 				value={filters.seats || ""}
 				onChange={handleFilterChange}
 			/>

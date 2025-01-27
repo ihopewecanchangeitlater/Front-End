@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import useToken from "./useToken";
-import { BASE_URL } from "../Utils/Endpoints";
+import { Endpoints } from "../Utils";
 
-axios.defaults.baseURL = BASE_URL;
+axios.defaults.baseURL = Endpoints.BASE_URL;
 
 const useFetch = (url, options = {}, immediate = true) => {
 	const { token } = useToken();
@@ -31,8 +31,6 @@ const useFetch = (url, options = {}, immediate = true) => {
 					},
 					...requestOptions,
 				};
-
-				console.log(params);
 				const response = await axios(params);
 				setData(response.data);
 			} catch (err) {

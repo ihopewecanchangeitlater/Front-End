@@ -1,22 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import Button from "@mui/material/Button";
 import moment from "moment";
-import Loading from "./Loading";
-import useToken from "../Hooks/useToken";
-import useFetch from "../Hooks/useFetch";
-import Input from "@mui/material/Input";
-import { QUANTITY_PROPS } from "../Utils/InputProps";
-import {
-	CARS_QUANTITY_URL,
-	CARS_URL,
-	RESERVATIONS_URL,
-	RESERVATIONS_CAR_URL,
-	CARS_BUY_URL,
-} from "../Utils/Endpoints";
+import { Loading } from "../Elements";
+import { useToken, useFetch } from "../../Hooks";
+import { Endpoints, InputProps } from "../../Utils";
+import { Box, Typography, Modal, Button, Input } from "@mui/material";
 
 const style = {
 	position: "absolute",
@@ -49,20 +37,20 @@ const CarPage = () => {
 	const [userId, setUserId] = useState("");
 	const navigate = useNavigate();
 	const { carId } = params;
+	const { data: carData, loading: carLoading } = useFetch(
+		`${Endpoints.CARS_URL}/${carId}`,
+		{
+			method: "get",
+			requiresAuth: true,
+		}
+	);
 	const {
-		data: carData,
-		loading: carLoading,
-		error: carError,
-	} = useFetch(`${CARS_URL}/${carId}`, {
-		method: "get",
-		requiresAuth: true,
-	});
-	const {
+		data: reservationData,
 		loading: reservationLoading,
 		error: reservationError,
 		refetch: reservationRefetch,
 	} = useFetch(
-		`${RESERVATIONS_URL}`,
+		`${Endpoints.RESERVATIONS_URL}`,
 		{
 			method: "post",
 			requiresAuth: true,
@@ -70,41 +58,51 @@ const CarPage = () => {
 		false
 	);
 	const { data: reservationCarData } = useFetch(
-		`${RESERVATIONS_CAR_URL}/${carId}`,
+		`${Endpoints.RESERVATIONS_CAR_URL}/${carId}`,
 		{
 			method: "get",
 			requiresAuth: true,
 		}
 	);
 	const {
+		data: quantityData,
 		loading: quantityLoading,
 		error: quantityError,
 		refetch: quantityRefetch,
 	} = useFetch(
-		`${CARS_QUANTITY_URL}/${carId}`,
+		`${Endpoints.CARS_QUANTITY_URL}/${carId}`,
 		{
 			method: "patch",
 			requiresAuth: true,
 		},
 		false
 	);
-	const { error: buyCarError, refetch: buyCarRefetch } = useFetch(
-		`${CARS_BUY_URL}/${carId}`,
+	const {
+		data: buyCarData,
+		loading: buyCarLoading,
+		error: buyCarError,
+		refetch: buyCarRefetch,
+	} = useFetch(
+		`${Endpoints.CARS_BUY_URL}/${carId}`,
 		{
 			method: "patch",
 			requiresAuth: true,
 		},
 		false
 	);
-	const { error: reservationDeleteError, refetch: reservationDeleteRefetch } =
-		useFetch(
-			`${RESERVATIONS_URL}`,
-			{
-				method: "delete",
-				requiresAuth: true,
-			},
-			false
-		);
+	const {
+		data: reservationDeleteData,
+		loading: reservationDeleteLoading,
+		error: reservationDeleteError,
+		refetch: reservationDeleteRefetch,
+	} = useFetch(
+		`${Endpoints.RESERVATIONS_URL}`,
+		{
+			method: "delete",
+			requiresAuth: true,
+		},
+		false
+	);
 
 	useEffect(() => {
 		// Ελέγχει αν υπάρχει ήδη συνδεδεμένος χρήστης
@@ -128,6 +126,37 @@ const CarPage = () => {
 		if (reservationCarData) setTestDriveCars(reservationCarData.length);
 	}, [reservationCarData, quantity]);
 
+	useEffect(() => {
+		if (quantityData) {
+			setQuantity(newQuantity); // Ενημέρωση της τρέχουσας ποσότητας μόνο μετά την επιτυχή αποστολή
+			setNewQuantity(0);
+		} else if (quantityError) {
+			alert("Error updating quantity");
+		}
+	}, [quantityData, quantityError]);
+
+	useEffect(() => {
+		if (reservationData) {
+			setTestDriveCars((prev) => prev + 1);
+		} else if (reservationError) {
+			alert("Test Drive arrangment failed");
+		}
+	}, [reservationData, reservationError]);
+
+	useEffect(() => {
+		if (reservationDeleteData) {
+			setTestDriveCars((prev) => prev - 1);
+		} else if (reservationDeleteError) {
+			alert("Failed to confirm test drive");
+		}
+		setCustomerTestDrive("");
+	}, [reservationDeleteData, reservationDeleteError]);
+
+	useEffect(() => {
+		if (buyCarData) setQuantity(buyCarData.quantity);
+		else if (buyCarError) alert("Car buy failed");
+	}, [buyCarData, buyCarError]);
+
 	// Ενημέρωση ποσότητας αυτοκινήτων στην βάση
 	const handleUpdateQuantity = () => {
 		quantityRefetch({
@@ -135,17 +164,13 @@ const CarPage = () => {
 				quantity: newQuantity,
 			},
 		});
-		if (!quantityError) {
-			setQuantity(newQuantity); // Ενημέρωση της τρέχουσας ποσότητας μόνο μετά την επιτυχή αποστολή
-			setNewQuantity(0);
-			alert("Quantity updated successfully!");
-		} else {
-			alert("Error updating quantity");
-		}
 	};
-
 	// Λειτουργία Test Drive (παίρνει ΜΟΝΟ ένα αμάξι για test drive)
 	const handleTestDrive = () => {
+		if (moment().diff(moment(date)) >= 0) {
+			alert("Pick a day in the future");
+			return;
+		}
 		reservationRefetch({
 			data: {
 				carId: car?.id,
@@ -154,42 +179,30 @@ const CarPage = () => {
 				time: time,
 			},
 		});
-		if (!reservationError) {
-			alert("Test Drive arranged successfully");
-			window.location.reload();
-		} else {
-			alert("Test Drive arrangment failed");
-		}
+		setIsCustomerModalVisible(false);
 	};
-
 	const handleTestDriveConfirm = () => {
 		reservationDeleteRefetch({}, [customerTestDrive]);
-		if (reservationDeleteError) {
-			alert("Failed to confirm test drive");
-		}
+		setIsAgentModalVisible(false);
 	};
-
 	// Αγορά αυτοκινήτου (μείωση της ποσότητας κατά 1)
 	// Εάν έχει αυτοκίνητο σε test drive, δεν μπορεί να αγοράσει άλλο
 	const handleBuyCar = () => {
 		buyCarRefetch();
-		if (!buyCarError) {
-			alert("Car bought successfully!");
-			window.location.reload();
-		} else {
-			alert("Car buy failed");
-		}
-	};
-
-	const handleCarReturn = () => {
-		setIsAgentModalVisible(true);
 	};
 
 	const handleCancel = () => {
 		navigate("/dashboard"); // Επιστροφή στο Dashboard (όταν έχει κάτι να επιστρέψει)
 	};
 
-	if (isAgent == null || carLoading || reservationLoading || quantityLoading)
+	if (
+		isAgent == null ||
+		carLoading ||
+		reservationLoading ||
+		quantityLoading ||
+		buyCarLoading ||
+		reservationDeleteLoading
+	)
 		return <Loading />;
 
 	// Εδώ προστέθηκε Talwind CSS
@@ -273,7 +286,10 @@ const CarPage = () => {
 							type="number"
 							value={newQuantity}
 							onChange={(e) => setNewQuantity(Number(e.target.value))}
-							inputProps={{ ...QUANTITY_PROPS, style: { textAlign: "center" } }}
+							inputProps={{
+								...InputProps.QUANTITY_PROPS,
+								style: { textAlign: "center" },
+							}}
 						/>
 						<button
 							onClick={handleUpdateQuantity}
@@ -304,7 +320,9 @@ const CarPage = () => {
 				{/* Εμφάνιση του κουμπιού Car Return μόνο αν δεν είναι agent */}
 				{isAgent && (
 					<button
-						onClick={handleCarReturn}
+						onClick={() => {
+							setIsAgentModalVisible(true);
+						}}
 						className="bg-red-500 text-white px-4 py-2 rounded-md"
 					>
 						Test Drive Return
@@ -356,10 +374,7 @@ const CarPage = () => {
 					<Button
 						sx={{ width: "50%", alignSelf: "center", mt: 2 }}
 						variant="contained"
-						onClick={() => {
-							handleTestDrive();
-							setIsCustomerModalVisible(false);
-						}}
+						onClick={handleTestDrive}
 					>
 						Book
 					</Button>
@@ -399,17 +414,14 @@ const CarPage = () => {
 								<option
 									key={reservation.id}
 									value={reservation.id}
-								>{`${reservation.date} | ${reservation.citizen.afm} | ${reservation.citizen.email}`}</option>
+								>{`${reservation.date} | ${reservation.time} | ${reservation.citizen.afm} | ${reservation.citizen.email}`}</option>
 							))}
 						</select>
 					)}
 					<Button
 						sx={{ width: "50%", alignSelf: "center", mt: 2 }}
 						variant="contained"
-						onClick={() => {
-							handleTestDriveConfirm();
-							setIsAgentModalVisible(false);
-						}}
+						onClick={handleTestDriveConfirm}
 					>
 						Confirm
 					</Button>

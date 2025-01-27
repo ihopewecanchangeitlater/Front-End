@@ -1,13 +1,6 @@
-import { useState, useEffect } from "react";
 import moment from "moment";
-import Badge from "@mui/material/Badge";
-import Tooltip from "@mui/material/Tooltip";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { Badge, Tooltip } from "@mui/material";
 import { PickersDay } from "@mui/x-date-pickers/PickersDay";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { RESERVATIONS_USER_URL } from "../Utils/Endpoints";
-import useFetch from "../Hooks/useFetch";
 
 function ServerDay(props) {
 	const { highlightedDays = [], day, outsideCurrentMonth, ...other } = props;
@@ -44,31 +37,4 @@ function ServerDay(props) {
 	);
 }
 
-function Calendar({ isAgent, userId }) {
-	const [value, setValue] = useState(moment());
-	const [highlightedDays, setHighlightedDays] = useState([]);
-	const { data } = useFetch(`${RESERVATIONS_USER_URL}/${userId}`, {
-		method: "get",
-		requiresAuth: true,
-		params: { is_agent: isAgent },
-	});
-	useEffect(() => {
-		if (data) setHighlightedDays([...new Set(data.map((r) => r.date))]);
-	}, [data]);
-	return (
-		<>
-			<LocalizationProvider dateAdapter={AdapterMoment}>
-				<DateCalendar
-					sx={{ minWidth: "fit" }}
-					readOnly
-					value={value}
-					onChange={setValue}
-					slots={{ day: ServerDay }}
-					slotProps={{ day: { highlightedDays } }}
-				/>
-			</LocalizationProvider>
-		</>
-	);
-}
-
-export default Calendar;
+export default ServerDay;

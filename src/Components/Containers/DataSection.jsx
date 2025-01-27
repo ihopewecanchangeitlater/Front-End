@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import Filters from "./Filters";
-import DataTable from "./DataTable";
-import useFetch from "../Hooks/useFetch";
-import { CARS_SEARCH_URL } from "../Utils/Endpoints";
+import { DataTable, Filters } from "../Elements";
+import { useFetch } from "../../Hooks";
+import { Endpoints } from "../../Utils";
 
 function DataSection({ isAgent, userId, refresh }) {
-	const { data, loading, error, refetch } = useFetch(
-		CARS_SEARCH_URL,
+	const { data, loading, refetch } = useFetch(
+		Endpoints.CARS_SEARCH_URL,
 		{
 			method: "get",
 			requiresAuth: true,

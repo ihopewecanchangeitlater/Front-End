@@ -1,23 +1,19 @@
 import { useState } from "react";
-import IconButton from "@mui/material/IconButton";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import Button from "@mui/material/Button";
-import NativeSelect from "@mui/material/NativeSelect";
-import useFetch from "../Hooks/useFetch";
-import { CARS_ADD_URL } from "../Utils/Endpoints";
-import Input from "@mui/material/Input";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
-import Tooltip from "@mui/material/Tooltip";
+import { useFetch } from "../../Hooks";
+import { Endpoints, InputProps } from "../../Utils";
 import {
-	ENGINE_PROPS,
-	PRICE_PROPS,
-	QUANTITY_PROPS,
-	SEATS_PROPS,
-} from "../Utils/InputProps";
+	IconButton,
+	Box,
+	Typography,
+	Modal,
+	Button,
+	NativeSelect,
+	Input,
+	InputLabel,
+	FormControl,
+	TextField,
+	Tooltip,
+} from "@mui/material";
 
 const boxStyle = {
 	position: "absolute",
@@ -52,8 +48,8 @@ function DealerOperations({ userId, setRefresh }) {
 	const [infosValue, setInfosValue] = useState("");
 	const [inputError, setInputError] = useState(null);
 	const [openModal, setOpenModal] = useState(false);
-	const { data, loading, error, refetch } = useFetch(
-		`${CARS_ADD_URL}/${userId}`,
+	const { data, error, refetch } = useFetch(
+		`${Endpoints.CARS_ADD_URL}/${userId}`,
 		{
 			method: "post",
 			requiresAuth: true,
@@ -76,11 +72,14 @@ function DealerOperations({ userId, setRefresh }) {
 		const modelValueValidation = modelValue.lenght !== 0;
 		const fuelValueValidation = fuelValue !== "";
 		const engineValueValidation =
-			engineValue >= ENGINE_PROPS.min && engineValue <= ENGINE_PROPS.max;
+			engineValue >= InputProps.ENGINE_PROPS.min &&
+			engineValue <= InputProps.ENGINE_PROPS.max;
 		const seatsValueValidation =
-			seatsValue >= SEATS_PROPS.min && seatsValue <= SEATS_PROPS.max;
-		const quantityValueValidation = quantityValue >= QUANTITY_PROPS.min;
-		const priceValueValidation = priceValue >= PRICE_PROPS.min;
+			seatsValue >= InputProps.SEATS_PROPS.min &&
+			seatsValue <= InputProps.SEATS_PROPS.max;
+		const quantityValueValidation =
+			quantityValue >= InputProps.QUANTITY_PROPS.min;
+		const priceValueValidation = priceValue >= InputProps.PRICE_PROPS.min;
 		if (!brandValueValidation) {
 			setInputError({ message: "Please complete with valid data" });
 			event.target[0].focus();
@@ -270,7 +269,7 @@ function DealerOperations({ userId, setRefresh }) {
 									<Input
 										type="number"
 										name="engine"
-										inputProps={ENGINE_PROPS}
+										inputProps={InputProps.ENGINE_PROPS}
 										value={engineValue}
 										onChange={(event) => {
 											setEngineValue(event.target.value);
@@ -288,7 +287,7 @@ function DealerOperations({ userId, setRefresh }) {
 									<Input
 										type="number"
 										name="seats"
-										inputProps={SEATS_PROPS}
+										inputProps={InputProps.SEATS_PROPS}
 										value={seatsValue}
 										onChange={(event) => {
 											setSeatsValue(event.target.value);
@@ -304,7 +303,7 @@ function DealerOperations({ userId, setRefresh }) {
 									<Input
 										type="number"
 										name="quantity"
-										inputProps={QUANTITY_PROPS}
+										inputProps={InputProps.QUANTITY_PROPS}
 										value={quantityValue}
 										onChange={(event) => {
 											setQuantityValue(event.target.value);
@@ -322,7 +321,7 @@ function DealerOperations({ userId, setRefresh }) {
 									<Input
 										type="number"
 										name="price"
-										inputProps={PRICE_PROPS}
+										inputProps={InputProps.PRICE_PROPS}
 										value={priceValue}
 										onChange={(event) => {
 											setPriceValue(event.target.value);

@@ -1,5 +1,5 @@
 import CircularProgress from "@mui/joy/CircularProgress";
-import image from "./android-chrome-192x192.png";
+import image from "../../Pictures/android-chrome-192x192.png";
 
 function Loading({ className }) {
 	return (
