@@ -19,15 +19,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18  # Specify your Node.js version
+          node-version: 23.5.0  # Use your Node.js version
 
       # Install dependencies
       - name: Install Dependencies
         run: npm install
-
+        
       # Run tests
       - name: Run Tests
-        run: npm test
+        run: npm test -- --watchAll=false --detectOpenHandles
 
       # Build the application
       - name: Build Application
