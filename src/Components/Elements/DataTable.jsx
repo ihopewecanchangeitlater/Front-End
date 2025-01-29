@@ -30,10 +30,10 @@ function DataTable({ data, loading, isAgent }) {
 	return (
 		<div
 			className={`w-full h-[75vh] overflow-hidden ${
-				loading || data == null ? "flex justify-center items-center" : ""
+				loading ? "flex justify-center items-center" : ""
 			}`}
 		>
-			{loading || data == null ? (
+			{loading ? (
 				<Loading />
 			) : (
 				<TableContainer
