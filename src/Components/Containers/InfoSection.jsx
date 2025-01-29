@@ -1,4 +1,4 @@
-import { DealerOperations } from "./";
+import { DealerOperations } from "../Elements";
 import { Calendar } from "../Elements";
 
 function InfoSection({ show, userId, setRefresh }) {

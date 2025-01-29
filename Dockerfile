@@ -1,30 +1,31 @@
-ARG NODE_VERSION=23.5.0
-
-# Base image
+# Build stage
 FROM node:alpine AS build
 
 WORKDIR /app
 
+# Copy package.json and package-lock.json to the container
 COPY package.json ./
 
-RUN npm i
+# Install dependencies
+RUN npm install
 
+# Copy the rest of the application code
 COPY . .
 
-ARG REACT_APP_API_BASE_URL
-
-ENV REACT_APP_API_BASE_URL $REACT_APP_API_BASE_URL
-
+# Build the React app
 RUN npm run build
 
-FROM node:${NODE_VERSION}-alpine
+# Serve stage
+FROM nginx:1.25.1
 
-WORKDIR /app
+# Copy the custom nginx.conf file to the container
+COPY .docker/nginx.conf /etc/nginx/nginx.conf
 
-COPY --from=build /app/build ./build
+# Copy the built React app from the build stage to the nginx container
+COPY --from=build /app/build /usr/share/nginx/html
 
-RUN npm install -g serve
+# Expose port 80
+EXPOSE 80
 
-EXPOSE 3000
-
-CMD serve -s build
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

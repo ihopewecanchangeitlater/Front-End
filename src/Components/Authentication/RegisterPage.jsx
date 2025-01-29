@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import useFetch from "../../Hooks/useFetch";
@@ -9,11 +9,19 @@ const RegisterPage = () => {
 	const [formData, setFormData] = useState({});
 	const [showPassword, setShowPassword] = useState(false); // Για εμφάνιση κωδικού
 	const navigate = useNavigate();
-	const { data, error, refetch } = useFetch(
+	const { data, loading, error, refetch } = useFetch(
 		`${AUTH_REGISTER_URL}`,
 		{ method: "post" },
 		false
 	);
+
+	useEffect(() => {
+		if (!loading && !error) {
+			navigate("/login");
+		} else {
+			alert(`Registration failed: ${error.message ? error.message : error}`);
+		}
+	}, [loading, error]);
 
 	const handleInputChange = (e) => {
 		setFormData({
@@ -25,13 +33,6 @@ const RegisterPage = () => {
 	const handleRegister = async (e) => {
 		e.preventDefault();
 		refetch({ data: formData }, [role]);
-		console.log(data, error);
-		if (!error && data) {
-			navigate("/login");
-		} else {
-			console.log(error);
-			alert("Registration failed.");
-		}
 	};
 	return (
 		<div className="relative top-12 flex flex-col justify-center items-center bg-gray-100 pt-4 pb-10 px-6 mx-20 rounded-lg w-1/2 h-min">
@@ -46,12 +47,12 @@ const RegisterPage = () => {
 					CITIZEN
 				</button>
 				<button
-					onClick={() => setRole("agent")}
+					onClick={() => setRole("agency")}
 					className={`px-4 py-2 rounded-md ${
-						role === "agent" ? "bg-green-500" : "bg-blue-500"
+						role === "agency" ? "bg-green-500" : "bg-blue-500"
 					} text-white`}
 				>
-					AGENT
+					AGENCY
 				</button>
 			</div>
 

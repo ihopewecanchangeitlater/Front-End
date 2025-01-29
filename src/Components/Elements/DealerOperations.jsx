@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFetch } from "../../Hooks";
 import { Endpoints, InputProps } from "../../Utils";
 import {
@@ -67,6 +67,17 @@ function DealerOperations({ userId, setRefresh }) {
 		setInfosValue("");
 	};
 
+	useEffect(() => {
+		if (data) {
+			alert("Car added successfully");
+			setOpenModal(false);
+			resetValues();
+			setRefresh((old) => !old);
+		} else if (error) {
+			alert(`Car failed to add: ${error.message ? error.message : error}`);
+		}
+	}, [data, error]);
+
 	const areValuesValid = (event) => {
 		const brandValueValidation = brandValue.length !== 0;
 		const modelValueValidation = modelValue.lenght !== 0;
@@ -127,14 +138,6 @@ function DealerOperations({ userId, setRefresh }) {
 				additionalInfo: infosValue,
 			},
 		});
-		if (data) {
-			alert("Car added successfully");
-			setOpenModal(false);
-			resetValues();
-			setRefresh((old) => !old);
-		} else if (error) {
-			alert("Car failed to add");
-		}
 	};
 	return (
 		<>
