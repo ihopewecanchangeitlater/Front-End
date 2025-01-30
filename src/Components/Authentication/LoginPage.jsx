@@ -13,7 +13,7 @@ const LoginPage = () => {
 	const { token, setToken } = useToken();
 	const { data, error, loading, refetch } = useFetch(
 		AUTH_LOGIN_URL,
-		{ method: "post" },
+		{ method: "post", requiresAuth: false },
 		false
 	);
 	useEffect(() => {

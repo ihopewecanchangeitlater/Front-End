@@ -41,7 +41,6 @@ const CarPage = () => {
 		`${Endpoints.CARS_URL}/${carId}`,
 		{
 			method: "get",
-			requiresAuth: true,
 		}
 	);
 	const {
@@ -53,7 +52,6 @@ const CarPage = () => {
 		`${Endpoints.RESERVATIONS_URL}`,
 		{
 			method: "post",
-			requiresAuth: true,
 		},
 		false
 	);
@@ -61,7 +59,6 @@ const CarPage = () => {
 		`${Endpoints.RESERVATIONS_CAR_URL}/${carId}`,
 		{
 			method: "get",
-			requiresAuth: true,
 		}
 	);
 	const {
@@ -73,7 +70,6 @@ const CarPage = () => {
 		`${Endpoints.CARS_QUANTITY_URL}/${carId}`,
 		{
 			method: "patch",
-			requiresAuth: true,
 		},
 		false
 	);
@@ -86,7 +82,6 @@ const CarPage = () => {
 		`${Endpoints.CARS_BUY_URL}/${carId}`,
 		{
 			method: "patch",
-			requiresAuth: true,
 		},
 		false
 	);
@@ -99,7 +94,6 @@ const CarPage = () => {
 		`${Endpoints.RESERVATIONS_URL}`,
 		{
 			method: "delete",
-			requiresAuth: true,
 		},
 		false
 	);

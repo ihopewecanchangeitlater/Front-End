@@ -1,4 +1,3 @@
-console.log(process.env.REACT_APP_API_BASE_URL);
 export const BASE_URL = `${process.env.REACT_APP_API_BASE_URL}/api`;
 export const AUTH_LOGIN_URL = "/auth/login";
 export const AUTH_REGISTER_URL = "/auth/register";

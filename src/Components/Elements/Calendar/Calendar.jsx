@@ -12,8 +12,6 @@ function Calendar({ isAgent, userId }) {
 	const [highlightedDays, setHighlightedDays] = useState([]);
 	const { data } = useFetch(`${Endpoints.RESERVATIONS_USER_URL}/${userId}`, {
 		method: "get",
-		requiresAuth: true,
-		params: { is_agent: isAgent },
 	});
 	useEffect(() => {
 		if (data) setHighlightedDays([...new Set(data.map((r) => r.date))]);

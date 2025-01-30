@@ -7,7 +7,6 @@ function DataSection({ isAgent, userId, refresh }) {
 		Endpoints.CARS_SEARCH_URL,
 		{
 			method: "get",
-			requiresAuth: true,
 		},
 		false
 	);
