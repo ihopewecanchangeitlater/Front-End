@@ -52,7 +52,6 @@ function DealerOperations({ userId, setRefresh }) {
 		`${Endpoints.CARS_ADD_URL}/${userId}`,
 		{
 			method: "post",
-			requiresAuth: true,
 		},
 		false
 	);

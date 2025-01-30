@@ -12,7 +12,7 @@ function DashboardPage() {
 	const [refresh, setRefresh] = useState(false);
 	const { refetch } = useFetch(
 		`${Endpoints.AUTH_LOGOUT_URL}`,
-		{ method: "post" },
+		{ method: "post", requiresAuth: false },
 		false
 	);
 	const navigate = useNavigate();
@@ -27,6 +27,13 @@ function DashboardPage() {
 			setIsAgent(user.roles[0] === "AGENCY");
 		}
 	}, [token, navigate]);
+
+	useEffect(() => {
+		if (refresh) window.location.reload();
+		return () => {
+			setRefresh(false);
+		};
+	}, [refresh]);
 
 	const signOutHandler = () => {
 		refetch();

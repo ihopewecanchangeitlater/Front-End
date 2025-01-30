@@ -11,17 +11,17 @@ const RegisterPage = () => {
 	const navigate = useNavigate();
 	const { data, loading, error, refetch } = useFetch(
 		`${AUTH_REGISTER_URL}`,
-		{ method: "post" },
+		{ method: "post", requiresAuth: false },
 		false
 	);
 
 	useEffect(() => {
-		if (!loading && !error) {
+		if (!loading && data) {
 			navigate("/login");
-		} else {
+		} else if (!loading && error) {
 			alert(`Registration failed: ${error.message ? error.message : error}`);
 		}
-	}, [loading, error]);
+	}, [data, loading, error]);
 
 	const handleInputChange = (e) => {
 		setFormData({

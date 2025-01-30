@@ -37,13 +37,13 @@ const CarPage = () => {
 	const [userId, setUserId] = useState("");
 	const navigate = useNavigate();
 	const { carId } = params;
-	const { data: carData, loading: carLoading } = useFetch(
-		`${Endpoints.CARS_URL}/${carId}`,
-		{
-			method: "get",
-			requiresAuth: true,
-		}
-	);
+	const {
+		data: carData,
+		loading: carLoading,
+		error: carError,
+	} = useFetch(`${Endpoints.CARS_URL}/${carId}`, {
+		method: "get",
+	});
 	const {
 		data: reservationData,
 		loading: reservationLoading,
@@ -53,15 +53,13 @@ const CarPage = () => {
 		`${Endpoints.RESERVATIONS_URL}`,
 		{
 			method: "post",
-			requiresAuth: true,
 		},
 		false
 	);
-	const { data: reservationCarData } = useFetch(
+	const { data: reservationCarData, refetch: reservationCarRefetch } = useFetch(
 		`${Endpoints.RESERVATIONS_CAR_URL}/${carId}`,
 		{
 			method: "get",
-			requiresAuth: true,
 		}
 	);
 	const {
@@ -73,7 +71,6 @@ const CarPage = () => {
 		`${Endpoints.CARS_QUANTITY_URL}/${carId}`,
 		{
 			method: "patch",
-			requiresAuth: true,
 		},
 		false
 	);
@@ -86,7 +83,6 @@ const CarPage = () => {
 		`${Endpoints.CARS_BUY_URL}/${carId}`,
 		{
 			method: "patch",
-			requiresAuth: true,
 		},
 		false
 	);
@@ -99,7 +95,6 @@ const CarPage = () => {
 		`${Endpoints.RESERVATIONS_URL}`,
 		{
 			method: "delete",
-			requiresAuth: true,
 		},
 		false
 	);
@@ -117,10 +112,14 @@ const CarPage = () => {
 
 	useEffect(() => {
 		if (carData) {
-			setCar(carData);
-			setQuantity(carData.quantity); // Τρέχουσα ποσότητα
+			if (carData.quantity > 0 || isAgent) {
+				setCar(carData);
+				setQuantity(carData.quantity); // Τρέχουσα ποσότητα
+			} else {
+				navigate("/dashboard");
+			}
 		}
-	}, [carData]);
+	}, [carData, carError]);
 
 	useEffect(() => {
 		if (reservationCarData) setTestDriveCars(reservationCarData.length);
@@ -136,8 +135,10 @@ const CarPage = () => {
 	}, [quantityData, quantityError]);
 
 	useEffect(() => {
+		console.log(reservationError);
 		if (reservationData) {
 			setTestDriveCars((prev) => prev + 1);
+			reservationCarRefetch();
 		} else if (reservationError) {
 			alert("Test Drive arrangment failed");
 		}
@@ -146,6 +147,7 @@ const CarPage = () => {
 	useEffect(() => {
 		if (reservationDeleteData) {
 			setTestDriveCars((prev) => prev - 1);
+			reservationCarRefetch();
 		} else if (reservationDeleteError) {
 			alert("Failed to confirm test drive");
 		}
@@ -189,6 +191,11 @@ const CarPage = () => {
 	// Εάν έχει αυτοκίνητο σε test drive, δεν μπορεί να αγοράσει άλλο
 	const handleBuyCar = () => {
 		buyCarRefetch();
+		for (let reservation of reservationCarData) {
+			reservationDeleteRefetch({}, [reservation.id]);
+		}
+		setTestDriveCars(0);
+		setCustomerTestDrive("");
 	};
 
 	const handleCancel = () => {

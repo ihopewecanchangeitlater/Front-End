@@ -18,7 +18,7 @@ const useFetch = (url, options = {}, immediate = true) => {
 			setError(null);
 			try {
 				// Check if the request requires authentication
-				const requiresAuth = options.requiresAuth || false; // Default is false
+				const requiresAuth = options.requiresAuth || true;
 				const authHeaders =
 					requiresAuth && token ? { Authorization: `Bearer ${token}` } : {};
 				const params = {
@@ -27,7 +27,7 @@ const useFetch = (url, options = {}, immediate = true) => {
 					}`,
 					...options,
 					headers: {
-						...authHeaders, // Add the auth header conditionally
+						...authHeaders,
 					},
 					...requestOptions,
 				};

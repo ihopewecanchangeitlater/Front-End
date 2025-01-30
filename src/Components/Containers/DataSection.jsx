@@ -7,13 +7,13 @@ function DataSection({ isAgent, userId, refresh }) {
 		Endpoints.CARS_SEARCH_URL,
 		{
 			method: "get",
-			requiresAuth: true,
 		},
 		false
 	);
 	return (
 		<>
 			<Filters
+				data={data}
 				fetchData={refetch}
 				isAgent={isAgent}
 				userId={userId}
