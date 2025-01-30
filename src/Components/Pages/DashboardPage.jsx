@@ -28,6 +28,13 @@ function DashboardPage() {
 		}
 	}, [token, navigate]);
 
+	useEffect(() => {
+		if (refresh) window.location.reload();
+		return () => {
+			setRefresh(false);
+		};
+	}, [refresh]);
+
 	const signOutHandler = () => {
 		refetch();
 		sessionStorage.clear();

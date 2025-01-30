@@ -13,6 +13,7 @@ function DataSection({ isAgent, userId, refresh }) {
 	return (
 		<>
 			<Filters
+				data={data}
 				fetchData={refetch}
 				isAgent={isAgent}
 				userId={userId}

@@ -1,6 +1,6 @@
 export const PRICE_PROPS = {
 	min: 0,
-	step: 0.01,
+	step: 1,
 };
 
 export const ENGINE_PROPS = {

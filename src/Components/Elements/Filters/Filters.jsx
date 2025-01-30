@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Button, NativeSelect, Input } from "@mui/material";
-import { InputProps } from "../../Utils";
+import { InputProps } from "../../../Utils";
+import RangeSlider from "./RangeSlider";
 
 const sx = {
 	marginTop: "1rem",
 	marginBottom: "1rem",
 };
 
-function Filters({ fetchData, isAgent, userId, isLoading, refresh }) {
+function Filters({ data, fetchData, isAgent, userId, isLoading, refresh }) {
 	const [filters, setFilters] = useState(isAgent ? { agency: userId } : {});
 	const formSubmition = (e) => {
 		e.preventDefault();
@@ -50,33 +51,6 @@ function Filters({ fetchData, isAgent, userId, isLoading, refresh }) {
 				value={filters.model || ""}
 				onChange={handleFilterChange}
 			/>
-			<Input
-				sx={sx}
-				type="number"
-				name="price"
-				placeholder="Price (max)"
-				inputProps={InputProps.PRICE_PROPS}
-				value={filters.price || ""}
-				onChange={handleFilterChange}
-			/>
-			<Input
-				sx={sx}
-				type="number"
-				name="engine"
-				placeholder="Engine"
-				inputProps={InputProps.ENGINE_PROPS}
-				value={filters.engine || ""}
-				onChange={handleFilterChange}
-			/>
-			<Input
-				sx={sx}
-				type="number"
-				name="seats"
-				placeholder="Seats"
-				inputProps={InputProps.SEATS_PROPS}
-				value={filters.seats || ""}
-				onChange={handleFilterChange}
-			/>
 			<NativeSelect
 				sx={sx}
 				defaultValue={filters.fuel || ""}
@@ -91,6 +65,27 @@ function Filters({ fetchData, isAgent, userId, isLoading, refresh }) {
 				<option value={"Diesel"}>Diesel</option>
 				<option value={"Electric"}>Electric</option>
 			</NativeSelect>
+			<RangeSlider
+				data={data}
+				attribute="price"
+				inputProps={InputProps.PRICE_PROPS}
+				setFilters={setFilters}
+			/>
+			<RangeSlider
+				data={data}
+				attribute="engine"
+				inputProps={InputProps.ENGINE_PROPS}
+				setFilters={setFilters}
+			/>
+			<Input
+				sx={sx}
+				type="number"
+				name="seats"
+				placeholder="Seats"
+				inputProps={InputProps.SEATS_PROPS}
+				value={filters.seats || ""}
+				onChange={handleFilterChange}
+			/>
 			<Button
 				sx={{ marginTop: "1.5rem" }}
 				variant="contained"
