@@ -25,6 +25,8 @@ function DataTable({ data, loading, isAgent }) {
 			if (isAgent === false)
 				setTableData(data.filter((car) => car.quantity > 0));
 			else setTableData(data);
+		} else if (data && data.length === 0) {
+			setTableData([]);
 		}
 	}, [data]);
 	return (
