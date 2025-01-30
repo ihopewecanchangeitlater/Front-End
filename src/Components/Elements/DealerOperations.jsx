@@ -14,6 +14,7 @@ import {
 	TextField,
 	Tooltip,
 } from "@mui/material";
+import { useAlert } from "../../Utils/AlertContext";
 
 const boxStyle = {
 	position: "absolute",
@@ -38,6 +39,7 @@ const inputStyle = {
 };
 
 function DealerOperations({ userId, setRefresh }) {
+	const { showAlert } = useAlert();
 	const [brandValue, setBrandValue] = useState("");
 	const [modelValue, setModelValue] = useState("");
 	const [fuelValue, setFuelValue] = useState("");
@@ -68,12 +70,12 @@ function DealerOperations({ userId, setRefresh }) {
 
 	useEffect(() => {
 		if (data) {
-			alert("Car added successfully");
+			showAlert("Car added successfully", "success");
 			setOpenModal(false);
 			resetValues();
 			setRefresh((old) => !old);
 		} else if (error) {
-			alert(`Car failed to add: ${error.message ? error.message : error}`);
+			showAlert(`Car failed to add: ${error.message ? error.message : error}`, "error");
 		}
 	}, [data, error]);
 
