@@ -5,6 +5,8 @@ import { Loading } from "../Elements";
 import { useToken, useFetch } from "../../Hooks";
 import { Endpoints, InputProps } from "../../Utils";
 import { Box, Typography, Modal, Button, Input } from "@mui/material";
+import AlertBox from "../Elements/AlertBox";
+import { useAlert } from "../../Utils/AlertContext";
 
 const style = {
 	position: "absolute",
@@ -22,6 +24,7 @@ const style = {
 };
 
 const CarPage = () => {
+	const { showAlert } = useAlert();
 	const { token } = useToken();
 	const params = useParams();
 	const [car, setCar] = useState(null); // Πληροφορίες αυτοκινήτου
@@ -130,17 +133,16 @@ const CarPage = () => {
 			setQuantity(newQuantity); // Ενημέρωση της τρέχουσας ποσότητας μόνο μετά την επιτυχή αποστολή
 			setNewQuantity(0);
 		} else if (quantityError) {
-			alert("Error updating quantity");
+			showAlert("Error updating quantity", "error");
 		}
 	}, [quantityData, quantityError]);
 
 	useEffect(() => {
-		console.log(reservationError);
 		if (reservationData) {
 			setTestDriveCars((prev) => prev + 1);
 			reservationCarRefetch();
 		} else if (reservationError) {
-			alert("Test Drive arrangment failed");
+			showAlert("Test Drive arrangment failed", "error");
 		}
 	}, [reservationData, reservationError]);
 
@@ -149,14 +151,18 @@ const CarPage = () => {
 			setTestDriveCars((prev) => prev - 1);
 			reservationCarRefetch();
 		} else if (reservationDeleteError) {
-			alert("Failed to confirm test drive");
+			showAlert("Failed to confirm test drive", "error");
 		}
 		setCustomerTestDrive("");
 	}, [reservationDeleteData, reservationDeleteError]);
 
 	useEffect(() => {
-		if (buyCarData) setQuantity(buyCarData.quantity);
-		else if (buyCarError) alert("Car buy failed");
+		if (!buyCarLoading) {
+			if (buyCarData) {
+				setQuantity(buyCarData.quantity);
+				showAlert("Thank you for your purchase", "success");
+			} else if (buyCarError) showAlert("Car buy failed", "error");
+		}
 	}, [buyCarData, buyCarError]);
 
 	// Ενημέρωση ποσότητας αυτοκινήτων στην βάση
@@ -170,7 +176,7 @@ const CarPage = () => {
 	// Λειτουργία Test Drive (παίρνει ΜΟΝΟ ένα αμάξι για test drive)
 	const handleTestDrive = () => {
 		if (moment().diff(moment(date)) >= 0) {
-			alert("Pick a day in the future");
+			showAlert("Pick a day in the future", "info");
 			return;
 		}
 		reservationRefetch({

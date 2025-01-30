@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import useFetch from "../../Hooks/useFetch";
 import { AUTH_REGISTER_URL } from "../../Utils/Endpoints";
+import { useAlert } from "../../Utils/AlertContext";
 
 const RegisterPage = () => {
+	const { showAlert } = useAlert();
 	const [role, setRole] = useState("");
 	const [formData, setFormData] = useState({});
 	const [showPassword, setShowPassword] = useState(false); // Για εμφάνιση κωδικού
@@ -19,7 +21,10 @@ const RegisterPage = () => {
 		if (!loading && data) {
 			navigate("/login");
 		} else if (!loading && error) {
-			alert(`Registration failed: ${error.message ? error.message : error}`);
+			showAlert(
+				`Registration failed: ${error.message ? error.message : error}`,
+				"error"
+			);
 		}
 	}, [data, loading, error]);
 

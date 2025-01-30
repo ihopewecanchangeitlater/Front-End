@@ -8,12 +8,12 @@ function RangeSlider({ data, attribute, inputProps, setFilters }) {
 	const [sliderValue, setSliderValue] = useState([min, max]);
 	useEffect(() => {
 		if (data) {
-			if (data.length > 0) {
-				const filterdData = data.filter((car) => car.quantity > 0);
-				filterdData.sort((a, b) => a[attribute] - b[attribute]);
+			const filteredData = data.filter((car) => car.quantity > 0);
+			if (filteredData && filteredData.length > 0) {
+				filteredData.sort((a, b) => a[attribute] - b[attribute]);
 				const [dataMin, dataMax] = [
-					filterdData[0][attribute],
-					filterdData[filterdData.length - 1][attribute],
+					filteredData[0][attribute],
+					filteredData[filteredData.length - 1][attribute],
 				];
 				if (dataMin < min) setMin(dataMin);
 				if (dataMax > max) setMax(dataMax);
